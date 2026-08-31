@@ -1,0 +1,43 @@
+{% extends "storefront/base.html" %}
+{% block title %}Checkout — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-24 max-w-6xl mx-auto px-6 lg:px-10">
+    <p class="eyebrow mb-6 reveal">Checkout</p>
+    <h1 class="font-display text-5xl font-extrabold tracking-tight mb-14 reveal">Almost there.</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-14">
+        <div class="lg:col-span-3 reveal">
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-semibold mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p class="text-sm text-danger mt-1">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary w-full sm:w-auto">Place Order</button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 reveal">
+            <div class="bg-cream-white rounded-2xl p-8 border border-ink/8 sticky top-28">
+                <p class="eyebrow text-xs mb-6">Order Summary</p>
+                <div class="space-y-4 mb-6">
+                    {% for line in lines %}
+                    <div class="flex justify-between text-sm">
+                        <span class="text-ink/70">{{ line.quantity }}&times; {{ line.menu_item.name }}</span>
+                        <span class="font-semibold text-ink">₦{{ line.line_total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="border-t border-ink/10 pt-4 flex justify-between items-baseline">
+                    <span class="font-display font-bold text-ink">Total</span>
+                    <span class="font-display text-2xl font-bold text-ember">₦{{ subtotal }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

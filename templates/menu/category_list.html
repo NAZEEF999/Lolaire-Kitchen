@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Menu — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-brand font-semibold">
+                Restaurant Menu
+            </p>
+            <h1 class="font-display text-2xl mt-1">
+                Menu Management
+            </h1>
+            <p class="text-sm text-inksoft mt-1">
+                Manage your categories and menu items from one place.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            {% if can_create %}
+            <a
+                href="{% url 'menu:category_create' %}"
+                class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold"
+            >
+                + Add Category
+            </a>
+
+            <a
+                href="{% url 'menu:item_create' %}"
+                class="border border-hairline bg-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-appbg transition"
+            >
+                + Add Menu Item
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- Quick navigation -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <a
+            href="{% url 'menu:item_list' %}"
+            class="admin-card group hover:border-brand/40 transition"
+        >
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wider text-inksoft">
+                        Menu
+                    </p>
+
+                    <h2 class="font-display text-lg mt-1">
+                        Menu Items
+                    </h2>
+
+                    <p class="text-sm text-inksoft mt-1">
+                        Add dishes, update prices and control availability.
+                    </p>
+                </div>
+
+                <span class="text-brand text-xl transition-transform group-hover:translate-x-1">
+                    →
+                </span>
+            </div>
+        </a>
+
+
+        <a
+            href="{% url 'menu:category_list' %}"
+            class="admin-card group hover:border-brand/40 transition"
+        >
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase tracking-wider text-inksoft">
+                        Organization
+                    </p>
+
+                    <h2 class="font-display text-lg mt-1">
+                        Categories
+                    </h2>
+
+                    <p class="text-sm text-inksoft mt-1">
+                        Create and organize your menu categories.
+                    </p>
+                </div>
+
+                <span class="text-brand text-xl transition-transform group-hover:translate-x-1">
+                    →
+                </span>
+            </div>
+        </a>
+
+    </div>
+
+
+    <!-- Categories -->
+    <section>
+
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="font-display text-lg">
+                    Categories
+                </h2>
+
+                <p class="text-sm text-inksoft mt-1">
+                    Your current menu structure.
+                </p>
+            </div>
+
+            {% if can_create %}
+            <a
+                href="{% url 'menu:category_create' %}"
+                class="text-sm font-semibold text-brand hover:underline"
+            >
+                + Add category
+            </a>
+            {% endif %}
+        </div>
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            {% for category in categories %}
+
+            <div class="admin-card hover:border-brand/40 transition">
+
+                <div class="flex items-start justify-between gap-4">
+
+                    <div class="min-w-0">
+                        <a
+                            href="{{ category.get_absolute_url }}"
+                            class="font-semibold hover:text-brand transition"
+                        >
+                            {{ category.name }}
+                        </a>
+
+                        <p class="text-sm text-inksoft mt-1">
+                            {{ category.item_count }}
+                            item{{ category.item_count|pluralize }}
+                        </p>
+                    </div>
+
+                    <span
+                        class="text-xs px-2.5 py-1 rounded-full
+                               bg-appbg border border-hairline text-inksoft"
+                    >
+                        {{ category.item_count }}
+                    </span>
+
+                </div>
+
+
+                <div class="flex items-center gap-4 mt-5 pt-4 border-t border-hairline">
+
+                    <a
+                        href="{{ category.get_absolute_url }}"
+                        class="text-sm font-semibold text-brand hover:underline"
+                    >
+                        View
+                    </a>
+
+                    {% if can_edit %}
+                    <a
+                        href="{% url 'menu:category_update' category.slug %}"
+                        class="text-sm font-semibold text-inksoft hover:text-ink"
+                    >
+                        Edit
+                    </a>
+                    {% endif %}
+
+                    {% if can_delete %}
+                    <a
+                        href="{% url 'menu:category_delete' category.slug %}"
+                        class="text-sm font-semibold text-critical hover:underline"
+                    >
+                        Deactivate
+                    </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% empty %}
+
+            <div class="sm:col-span-2 lg:col-span-3 admin-card text-center py-12">
+
+                <p class="font-semibold">
+                    No categories yet
+                </p>
+
+                <p class="text-sm text-inksoft mt-1">
+                    Create your first category to start building the restaurant menu.
+                </p>
+
+                {% if can_create %}
+                <a
+                    href="{% url 'menu:category_create' %}"
+                    class="inline-flex mt-5 btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold"
+                >
+                    + Create First Category
+                </a>
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "storefront/base.html" %}
+{% load static %}
+{% block title %}About — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+
+<section class="relative min-h-[70vh] flex items-end bg-ink overflow-hidden">
+    <div class="absolute inset-0">
+        <img src="{% static 'images/about-hero.jpg' %}" alt="Lolaire's Kitchen dining room" class="w-full h-full object-cover opacity-60">
+        <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/10"></div>
+    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pb-20 pt-40">
+        <p class="eyebrow eyebrow-light mb-6 reveal">Our Story</p>
+        <h1 class="font-display text-cream-white text-5xl lg:text-7xl font-extrabold tracking-tight max-w-3xl reveal">
+            Every dish carries a memory.
+        </h1>
+    </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-6 py-24 lg:py-32">
+    <div class="reveal space-y-6 text-lg text-cream-white/70 leading-relaxed">
+        <p>
+            Lolaire's Kitchen began in a small Lagos flat, in a kitchen that smelled permanently
+            of pepper and palm oil. Long before it had a name, it had a purpose: to cook the food
+            that raised us, exactly as well as it deserved.
+        </p>
+        <p>
+            Today, that same care shows up in every plate we send out — a jollof rice that takes
+            three hours to get right, suya spiced by hand, efo riro built on stock we make from
+            scratch every morning. Nothing shortcut. Nothing generic.
+        </p>
+        <p>
+            We're not trying to reinvent Nigerian cooking. We're trying to honor it — with better
+            ingredients, sharper technique, and a room that feels as good as the food tastes.
+        </p>
+    </div>
+</section>
+
+<section class="grid grid-cols-1 md:grid-cols-2 gap-1">
+    <div class="reveal aspect-[4/3]">
+        <img src="{% static 'images/about-kitchen.jpg' %}" alt="Chefs at work in the Lolaire's Kitchen kitchen" class="w-full h-full object-cover">
+    </div>
+    <div class="reveal aspect-[4/3]">
+        <img src="{% static 'images/about-dining-room.jpg' %}" alt="Lolaire's Kitchen dining room interior" class="w-full h-full object-cover">
+    </div>
+</section>
+
+<section class="bg-ink-soft py-24 lg:py-32">
+    <div class="max-w-3xl mx-auto px-6 text-center reveal">
+        <p class="eyebrow mb-6">Come Taste It Yourself</p>
+        <h2 class="font-display text-cream-white text-4xl lg:text-5xl font-bold tracking-tight mb-10">
+            The story's better with a fork in hand.
+        </h2>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'storefront:menu' %}" class="btn btn-primary">Order Now</a>
+            <a href="{% url 'reservations:create' %}" class="btn btn-outline-light">Reserve a Table</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

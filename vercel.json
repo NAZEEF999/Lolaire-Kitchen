@@ -1,0 +1,10 @@
+{
+  "buildCommand": "python manage.py collectstatic --no-input && python manage.py migrate --no-input",
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/staticfiles/$1" },
+    { "src": "/(.*)", "dest": "api/index.py" }
+  ]
+}

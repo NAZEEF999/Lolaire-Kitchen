@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block title %}Menu Items — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+        <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-brand font-semibold">
+                Restaurant Menu
+            </p>
+
+            <h1 class="font-display text-2xl mt-1">
+                Menu Items
+            </h1>
+
+            <p class="text-sm text-inksoft mt-1">
+                Manage dishes, prices and availability.
+            </p>
+        </div>
+
+        <div class="flex gap-3">
+
+            <a
+                href="{% url 'menu:category_list' %}"
+                class="border border-hairline px-4 py-2.5 rounded-full text-sm font-semibold hover:bg-appbg"
+            >
+                Categories
+            </a>
+
+            {% if can_create %}
+            <a
+                href="{% url 'menu:item_create' %}"
+                class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold"
+            >
+                + Add Item
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <!-- Filters -->
+    <div class="admin-card">
+
+        <form
+            method="get"
+            class="grid grid-cols-1 md:grid-cols-4 gap-3"
+        >
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Search menu items..."
+                class="rounded-md border border-hairline px-3 py-2.5 text-sm"
+            >
+
+            <select
+                name="category"
+                class="rounded-md border border-hairline px-3 py-2.5 text-sm"
+            >
+                <option value="">
+                    All categories
+                </option>
+
+                {% for category in categories %}
+                <option
+                    value="{{ category.slug }}"
+                    {% if category.slug == selected_category %}selected{% endif %}
+                >
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+
+            <select
+                name="is_available"
+                class="rounded-md border border-hairline px-3 py-2.5 text-sm"
+            >
+                <option value="">
+                    Any availability
+                </option>
+
+                <option
+                    value="true"
+                    {% if selected_availability == "true" %}selected{% endif %}
+                >
+                    Available
+                </option>
+
+                <option
+                    value="false"
+                    {% if selected_availability == "false" %}selected{% endif %}
+                >
+                    Unavailable
+                </option>
+            </select>
+
+
+            <button
+                type="submit"
+                class="bg-appbg border border-hairline rounded-md px-4 py-2.5 text-sm font-semibold hover:bg-hairline/40"
+            >
+                Apply Filters
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Items -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+
+        {% for item in menu_items %}
+
+        <article class="admin-card hover:border-brand/40 transition">
+
+            {% if item.image %}
+            <img
+                src="{{ item.image.url }}"
+                alt="{{ item.name }}"
+                class="w-full h-44 object-cover rounded-lg mb-4"
+            >
+            {% endif %}
+
+
+            <div class="flex items-start justify-between gap-3">
+
+                <div class="min-w-0">
+
+                    <p class="text-xs text-inksoft">
+                        {{ item.category.name }}
+                    </p>
+
+                    <a
+                        href="{{ item.get_absolute_url }}"
+                        class="font-semibold text-base hover:text-brand transition"
+                    >
+                        {{ item.name }}
+                    </a>
+
+                </div>
+
+                {% if item.is_featured %}
+                <span class="badge badge-brand flex-shrink-0">
+                    Featured
+                </span>
+                {% endif %}
+
+            </div>
+
+
+            <p class="text-sm text-inksoft mt-2 line-clamp-2">
+                {{ item.description|default:"No description yet." }}
+            </p>
+
+
+            <div class="flex items-center justify-between mt-4">
+
+                <p class="font-display text-lg">
+                    ₦{{ item.price }}
+                </p>
+
+                <span
+                    class="badge
+                    {% if item.is_available %}
+                        badge-accent
+                    {% else %}
+                        badge-critical
+                    {% endif %}"
+                >
+                    {{ item.is_available|yesno:"Available,Unavailable" }}
+                </span>
+
+            </div>
+
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4 mt-5 pt-4 border-t border-hairline">
+
+                <a
+                    href="{{ item.get_absolute_url }}"
+                    class="text-sm font-semibold text-brand hover:underline"
+                >
+                    View
+                </a>
+
+                {% if can_edit %}
+                <a
+                    href="{% url 'menu:item_update' item.slug %}"
+                    class="text-sm font-semibold text-inksoft hover:text-ink"
+                >
+                    Edit
+                </a>
+                {% endif %}
+
+                {% if can_delete %}
+                <a
+                    href="{% url 'menu:item_delete' item.slug %}"
+                    class="text-sm font-semibold text-critical hover:underline"
+                >
+                    Deactivate
+                </a>
+                {% endif %}
+
+            </div>
+
+        </article>
+
+        {% empty %}
+
+        <div class="md:col-span-2 xl:col-span-3 admin-card text-center py-12">
+
+            <p class="font-semibold">
+                No menu items found
+            </p>
+
+            <p class="text-sm text-inksoft mt-1">
+                Try changing your filters or add a new menu item.
+            </p>
+
+            {% if can_create %}
+            <a
+                href="{% url 'menu:item_create' %}"
+                class="inline-flex mt-5 btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold"
+            >
+                + Add Menu Item
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-center items-center gap-5 text-sm">
+
+        {% if page_obj.has_previous %}
+        <a
+            href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_availability %}&is_available={{ selected_availability }}{% endif %}"
+            class="font-semibold text-brand hover:underline"
+        >
+            Previous
+        </a>
+        {% endif %}
+
+        <span class="text-inksoft">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a
+            href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_availability %}&is_available={{ selected_availability }}{% endif %}"
+            class="font-semibold text-brand hover:underline"
+        >
+            Next
+        </a>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

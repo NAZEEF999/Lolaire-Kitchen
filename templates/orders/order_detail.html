@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}#{{ order.order_number }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+    <div>
+        <h1 class="font-display text-xl">Order #{{ order.order_number }}</h1>
+        <p class="text-inksoft text-sm mt-1">
+            {% if order.customer %}{{ order.customer.full_name }}{% else %}Walk-in{% endif %}
+            {% if order.table %} · Table {{ order.table.table_number }}{% endif %}
+            · {{ order.created_at|date:"M d, Y — g:ia" }}
+        </p>
+    </div>
+    <div class="flex items-center gap-2">
+        <span class="badge {% if order.status == 'served' %}badge-accent{% elif order.status == 'cancelled' %}badge-critical{% else %}badge-warning{% endif %}">{{ order.get_status_display }}</span>
+        {% if can_see_payments %}
+        <span class="badge {% if order.payment_status == 'paid' %}badge-accent{% elif order.payment_status == 'cancelled' %}badge-critical{% elif order.payment_status == 'refunded' %}badge-info{% else %}badge-warning{% endif %}">{{ order.get_payment_status_display }}</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if order.delivery_address %}
+<div class="admin-card mb-6">
+    <p class="text-xs uppercase tracking-wide text-inksoft font-semibold mb-1">Delivery Address</p>
+    <p class="text-sm">{{ order.delivery_address }}</p>
+</div>
+{% endif %}
+
+<div class="admin-card !p-0 overflow-hidden mb-6">
+    <table class="admin-table">
+        <thead>
+            <tr><th>Item</th><th>Qty</th>{% if can_see_payments %}<th>Unit Price</th><th>Line Total</th>{% endif %}<th></th></tr>
+        </thead>
+        <tbody>
+        {% for item in order.items.all %}
+            <tr>
+                <td class="font-medium">{{ item.menu_item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                {% if can_see_payments %}
+                <td>₦{{ item.unit_price }}</td>
+                <td class="font-medium">₦{{ item.line_total }}</td>
+                {% endif %}
+                <td class="text-right">
+                    {% if can_edit %}
+                    <form method="post" action="{% url 'orders:item_remove' order.pk item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="text-critical hover:underline text-xs font-semibold">Remove</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="{% if can_see_payments %}5{% else %}3{% endif %}" class="text-center py-8 text-inksoft">No items yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if can_see_payments %}
+    <div class="text-sm text-right space-y-1 px-5 py-4 border-t border-hairline bg-appbg">
+        <p class="text-inksoft">Subtotal: ₦{{ order.subtotal }}</p>
+        <p class="text-inksoft">Discount: ₦{{ order.discount_amount }}</p>
+        <p class="text-inksoft">Tax: ₦{{ order.tax_amount }}</p>
+        <p class="font-display text-lg">Total: ₦{{ order.total_amount }}</p>
+    </div>
+    {% endif %}
+    {% if can_edit %}
+    <div class="px-5 py-4 border-t border-hairline">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">Add Item</p>
+        <form method="post" action="{% url 'orders:item_add' order.pk %}" class="flex flex-wrap gap-3">
+            {% csrf_token %}
+            {{ add_item_form.menu_item }}
+            {{ add_item_form.quantity }}
+            <button type="submit" class="btn-admin-primary text-white px-4 py-2 rounded-md text-sm font-semibold">Add</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    {% if can_edit %}
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">Order Status</p>
+        <form method="post" action="{% url 'orders:status_update' order.pk %}" class="flex gap-2">
+            {% csrf_token %}
+            {{ status_form.status }}
+            <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-semibold hover:bg-hairline/40">Update</button>
+        </form>
+    </div>
+    {% endif %}
+    {% if can_see_payments and can_edit_payments %}
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">Payment Status</p>
+        <form method="post" action="{% url 'orders:payment_status_update' order.pk %}" class="flex gap-2">
+            {% csrf_token %}
+            {{ payment_status_form.payment_status }}
+            <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-semibold hover:bg-hairline/40">Update</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<div class="flex gap-3">
+    {% if can_complete %}
+    <form method="post" action="{% url 'orders:complete' order.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="bg-accent text-white rounded-full px-5 py-2.5 text-sm font-semibold hover:opacity-90">
+            Mark Served
+        </button>
+    </form>
+    {% endif %}
+    {% if can_cancel %}
+    <form method="post" action="{% url 'orders:cancel' order.pk %}" onsubmit="return confirm('Cancel this order?');">
+        {% csrf_token %}
+        <button type="submit" class="bg-white border border-critical text-critical rounded-full px-5 py-2.5 text-sm font-semibold hover:bg-critical-50">
+            Cancel Order
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

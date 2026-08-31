@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"Lolaire's Kitchen Admin" }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">Lolaire's <em>Kitchen</em> — {{ site_header|default:"Admin" }}</a>
+</div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block usertools %}
+{% if has_permission %}
+<div id="user-tools">
+    {% if can_admin_to_dashboard %}
+        <a href="{% url 'dashboard:home' %}" class="lolaire-back-link">&larr; Back to Dashboard</a>
+    {% endif %}
+    {% block welcome-msg %}
+        {% translate 'Welcome,' %}
+        <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+    {% endblock %}
+    {% block userlinks %}
+        {% if site_url %}<a href="{{ site_url }}">{% translate 'View site' %}</a> /{% endif %}
+        {% if user.has_usable_password %}
+        <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+        {% endif %}
+        <a href="{% url 'admin:logout' %}">{% translate 'Log out' %}</a>
+    {% endblock %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Menu Item — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+    <h1 class="font-display text-xl mb-6">{% if object %}Edit {{ object.name }}{% else %}Add Menu Item{% endif %}</h1>
+    <div class="admin-card">
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+                <div>
+                    <label class="block text-sm font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                    {% if field.name == "category" %}
+                        <div class="flex gap-2">
+                            <div class="flex-1">{{ field }}</div>
+
+                            <button
+                                type="button"
+                                onclick="document.getElementById('categoryModal').classList.remove('hidden')"
+                                class="flex-shrink-0 px-4 py-2 rounded-md
+                                       border border-brand text-brand
+                                       text-sm font-semibold
+                                       hover:bg-brand hover:text-white
+                                       transition"
+                            >
+                                + New Category
+                            </button>
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.errors %}<p class="text-sm text-critical mt-1">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+                Save
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     QUICK ADD CATEGORY MODAL
+     Submitted via fetch() to menu:category_create rather than a
+     plain form POST, so creating a category doesn't navigate away
+     from — and lose — the menu item you're in the middle of adding.
+     ========================================================= -->
+<div
+    id="categoryModal"
+    class="hidden fixed inset-0 z-50
+           bg-black/50 backdrop-blur-sm
+           flex items-center justify-center
+           p-4"
+>
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl">
+
+        <div class="flex items-center justify-between
+                    px-6 py-4 border-b border-hairline">
+
+            <div>
+                <h2 class="font-display text-lg">
+                    Add New Category
+                </h2>
+
+                <p class="text-sm text-inksoft mt-1">
+                    Create a category without leaving this item.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onclick="document.getElementById('categoryModal').classList.add('hidden')"
+                class="text-inksoft hover:text-ink text-xl"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="categoryQuickAddForm" class="p-6 space-y-4">
+            {% csrf_token %}
+
+            <div id="categoryModalNonFieldError"></div>
+
+            {% for field in category_form %}
+                <div>
+                    <label
+                        for="{{ field.id_for_label }}"
+                        class="block text-sm font-medium mb-1"
+                    >
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    <p
+                        class="text-sm text-critical mt-1 hidden"
+                        data-error-for="{{ field.name }}"
+                    ></p>
+                </div>
+            {% endfor %}
+
+
+            <div class="flex justify-end gap-3 pt-3">
+
+                <button
+                    type="button"
+                    onclick="document.getElementById('categoryModal').classList.add('hidden')"
+                    class="px-4 py-2 rounded-full
+                           border border-hairline
+                           text-sm font-semibold"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-admin-primary text-white
+                           px-5 py-2 rounded-full
+                           text-sm font-semibold"
+                >
+                    Create Category
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+(function () {
+    var form = document.getElementById("categoryQuickAddForm");
+    if (!form) return;
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        // Clear previous errors
+        form.querySelectorAll("[data-error-for]").forEach(function (el) {
+            el.textContent = "";
+            el.classList.add("hidden");
+        });
+
+        var csrfToken = form.querySelector("[name=csrfmiddlewaretoken]").value;
+
+        fetch("{% url 'menu:category_create' %}", {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": csrfToken,
+            },
+            body: new FormData(form),
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
+                });
+            })
+            .then(function (result) {
+                if (!result.ok) {
+                    var errors = result.data.errors || {};
+
+                    Object.keys(errors).forEach(function (fieldName) {
+                        var el = form.querySelector('[data-error-for="' + fieldName + '"]');
+
+                        if (el) {
+                            el.textContent = errors[fieldName][0].message || errors[fieldName][0];
+                            el.classList.remove("hidden");
+                        }
+                    });
+
+                    return;
+                }
+
+                // Add the new category to the main form's dropdown and select it.
+                var select = document.getElementById("id_category");
+
+                if (select) {
+                    var option = document.createElement("option");
+                    option.value = result.data.id;
+                    option.textContent = result.data.name;
+                    option.selected = true;
+                    select.appendChild(option);
+                }
+
+                form.reset();
+                document.getElementById("categoryModal").classList.add("hidden");
+            })
+            .catch(function () {
+                var el = document.getElementById("categoryModalNonFieldError");
+                el.textContent = "Something went wrong — please try again.";
+                el.className = "text-sm text-critical mb-2";
+            });
+    });
+})();
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Orders Report — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'reports:home' %}" class="text-xs font-semibold text-brand hover:underline">&larr; Back to Reports</a>
+    <h1 class="font-display text-xl mt-2">Orders Report</h1>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">By Status</p>
+        {% for row in status_breakdown %}<p class="text-sm flex justify-between py-1"><span>{{ row.label }}</span><span class="font-medium">{{ row.count }}</span></p>{% endfor %}
+    </div>
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">By Payment Status</p>
+        {% for row in payment_status_breakdown %}<p class="text-sm flex justify-between py-1"><span>{{ row.label }}</span><span class="font-medium">{{ row.count }}</span></p>{% endfor %}
+    </div>
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">By Payment Method</p>
+        {% for row in payment_method_breakdown %}<p class="text-sm flex justify-between py-1"><span>{{ row.label }}</span><span class="font-medium">{{ row.count }}</span></p>{% endfor %}
+    </div>
+</div>
+
+<div class="admin-card mb-6">
+    <p class="text-sm font-semibold mb-3">Filter</p>
+    <form method="get" class="flex flex-wrap gap-3">
+        {{ form.start_date }}{{ form.end_date }}{{ form.status }}{{ form.payment_status }}{{ form.payment_method }}
+        <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-medium hover:bg-hairline/40">Run</button>
+    </form>
+    {% if form.errors %}<p class="text-sm text-critical mt-3">{{ form.errors }}</p>{% endif %}
+</div>
+
+{% if filtered_orders %}
+<div class="admin-card !p-0 overflow-hidden">
+    <div class="divide-y divide-hairline">
+    {% for order in filtered_orders %}
+        <div class="px-5 py-3 text-sm flex justify-between">
+            <span class="font-medium">#{{ order.order_number }}</span>
+            <span class="text-inksoft">{{ order.get_status_display }} · ₦{{ order.total_amount }}</span>
+        </div>
+    {% empty %}<p class="px-5 py-8 text-sm text-inksoft text-center">No orders in that range.</p>{% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ object.name }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-sm admin-card">
+    <h1 class="font-display text-lg mb-3">Delete "{{ object.name }}"?</h1>
+    <p class="text-sm text-inksoft mb-6">
+        This deactivates the category and all its menu items — they can be restored later from Django Admin.
+    </p>
+    <form method="post" class="flex items-center gap-4">
+        {% csrf_token %}
+        <button type="submit" class="bg-critical text-white rounded-full px-5 py-2.5 text-sm font-semibold hover:opacity-90">
+            Confirm Delete
+        </button>
+        <a href="{% url 'menu:category_detail' object.slug %}" class="text-sm font-semibold text-inksoft hover:text-ink">Cancel</a>
+    </form>
+</div>
+{% endblock %}

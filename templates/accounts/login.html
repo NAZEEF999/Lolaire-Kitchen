@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+{% block title %}Staff Login — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<div class="min-h-screen w-full bg-[#080807] text-white overflow-x-hidden">
+
+  <div class="min-h-screen flex">
+
+    <!-- =========================================================
+         LEFT: HERO / BRAND
+         ========================================================= -->
+    <section class="hidden lg:flex lg:w-[55%] relative min-h-screen overflow-hidden">
+
+      <!-- Background -->
+      <div
+        class="absolute inset-0 bg-cover bg-center"
+        style="
+          background-image:
+            url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=85');
+        "
+        aria-hidden="true"
+      ></div>
+
+      <!-- Overlays -->
+      <div class="absolute inset-0 bg-black/45" aria-hidden="true"></div>
+
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-black/75"
+        aria-hidden="true"
+      ></div>
+
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Glow -->
+      <div
+        class="absolute -top-32 -left-32 w-96 h-96 rounded-full
+               bg-amber-400/10 blur-3xl pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Content -->
+      <div
+        class="relative z-10 w-full min-h-screen
+               flex flex-col justify-between
+               p-10 xl:p-14 2xl:p-16"
+      >
+
+        <!-- Brand -->
+        <div class="flex items-center gap-3.5">
+          <div
+            class="w-11 h-11 rounded-full border border-amber-400/60
+                   flex items-center justify-center
+                   bg-black/30 backdrop-blur-md"
+          >
+            <span class="font-serif text-lg text-amber-400">L</span>
+          </div>
+
+          <div>
+            <p class="text-base font-serif tracking-wide">
+              Lolaire's Kitchen
+            </p>
+
+            <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400">
+              Restaurant Management
+            </p>
+          </div>
+        </div>
+
+        <!-- Hero -->
+        <div class="max-w-xl">
+
+          <div class="flex items-center gap-3 mb-5">
+            <span class="w-8 h-px bg-amber-400"></span>
+
+            <span
+              class="text-[11px] uppercase tracking-[0.35em] text-amber-400"
+            >
+              Staff Portal
+            </span>
+          </div>
+
+          <h1
+            class="font-serif text-4xl xl:text-5xl 2xl:text-6xl
+                   leading-[1.08] font-medium tracking-tight"
+          >
+            Where every
+            <span class="text-amber-400 italic">detail</span>
+            matters.
+          </h1>
+
+          <p
+            class="mt-5 max-w-md text-gray-300
+                   text-sm xl:text-base leading-relaxed"
+          >
+            Manage orders, reservations, tables, menus and everything that
+            keeps Lolaire's Kitchen running beautifully.
+          </p>
+
+        </div>
+
+        <!-- Bottom -->
+        <div class="flex items-end justify-between gap-6">
+
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-500">
+              Crafted for
+            </p>
+
+            <p class="mt-0.5 text-sm text-gray-300">
+              The Lolaire's Kitchen Team
+            </p>
+          </div>
+
+          <div class="hidden xl:block text-right">
+            <p class="text-xs text-gray-500">
+              © {% now "Y" %} Lolaire's Kitchen
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         RIGHT: LOGIN
+         ========================================================= -->
+    <section
+      class="relative w-full lg:w-[45%]
+             min-h-screen flex items-center justify-center
+             px-5 py-10 sm:px-8 sm:py-12
+             overflow-y-auto"
+    >
+
+      <!-- Glow -->
+      <div
+        class="absolute top-0 right-0 w-72 h-72
+               bg-amber-400/[0.04] blur-3xl rounded-full
+               pointer-events-none"
+        aria-hidden="true"
+      ></div>
+
+
+      <div class="relative z-10 w-full max-w-[400px]">
+
+        <!-- =====================================================
+             MOBILE BRANDING
+             ===================================================== -->
+        <div class="lg:hidden text-center mb-8">
+
+          <div
+            class="mx-auto w-12 h-12 rounded-full
+                   border border-amber-400/60
+                   bg-amber-400/10
+                   flex items-center justify-center"
+          >
+            <span class="font-serif text-xl text-amber-400">
+              L
+            </span>
+          </div>
+
+          <h1 class="mt-3 font-serif text-xl text-white">
+            Lolaire's Kitchen
+          </h1>
+
+          <p
+            class="mt-0.5 text-[10px] uppercase
+                   tracking-[0.25em] text-gray-500"
+          >
+            Staff Portal
+          </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             LOGIN HEADING
+             ===================================================== -->
+        <div class="mb-7">
+
+          <p
+            class="text-[11px] uppercase
+                   tracking-[0.3em] text-amber-400 mb-2"
+          >
+            Welcome back
+          </p>
+
+          <h2 class="font-serif text-3xl font-medium text-white">
+            Sign in
+          </h2>
+
+          <p class="mt-1.5 text-sm text-gray-500">
+            Access your restaurant management dashboard.
+          </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             NON-FIELD ERRORS
+             ===================================================== -->
+        {% if form.non_field_errors %}
+          <div
+            class="mb-5 rounded-xl
+                   border border-red-500/20
+                   bg-red-500/10
+                   px-4 py-3"
+            role="alert"
+          >
+            <div class="flex gap-3">
+
+              <svg
+                class="w-5 h-5 text-red-400 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14a2 2 0 001.73 3h16.32a2 2 0 001.73-3l-8.18-14a2 2 0 00-3.46 0z"
+                />
+              </svg>
+
+              <div class="text-sm text-red-300">
+                {{ form.non_field_errors }}
+              </div>
+
+            </div>
+          </div>
+        {% endif %}
+
+
+        <!-- =====================================================
+             FORM
+             ===================================================== -->
+        <form
+          method="post"
+          class="space-y-5"
+          novalidate
+        >
+          {% csrf_token %}
+
+
+          <!-- ===================================================
+               USERNAME
+               =================================================== -->
+          <div>
+
+            <label
+              for="{{ form.username.id_for_label }}"
+              class="block text-sm font-medium
+                     text-gray-300 mb-1.5"
+            >
+              {{ form.username.label }}
+            </label>
+
+            <div class="relative">
+
+              <div
+                class="absolute inset-y-0 left-0 pl-4
+                       flex items-center pointer-events-none"
+              >
+                <svg
+                  class="w-5 h-5 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                    d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm11 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                  />
+                </svg>
+              </div>
+
+              <input
+                type="text"
+                name="{{ form.username.html_name }}"
+                id="{{ form.username.id_for_label }}"
+                value="{{ form.username.value|default:'' }}"
+                autocomplete="username"
+                autofocus
+                required
+                placeholder="Enter your username"
+                aria-invalid="{% if form.username.errors %}true{% else %}false{% endif %}"
+                {% if form.username.errors %}
+                  aria-describedby="username-error"
+                {% endif %}
+                class="
+                  w-full h-12 pl-12 pr-4 rounded-xl
+                  bg-white/[0.035] border
+                  {% if form.username.errors %}
+                    border-red-500/60
+                  {% else %}
+                    border-white/10
+                  {% endif %}
+                  text-white placeholder-gray-600
+                  outline-none
+                  transition-all duration-200
+                  focus:border-amber-400/70
+                  focus:bg-white/[0.05]
+                  focus:ring-4 focus:ring-amber-400/5
+                "
+              />
+
+            </div>
+
+            {% if form.username.errors %}
+              <p
+                id="username-error"
+                class="mt-1.5 text-xs text-red-400"
+              >
+                {{ form.username.errors.0 }}
+              </p>
+            {% endif %}
+
+          </div>
+
+
+          <!-- ===================================================
+               PASSWORD
+               =================================================== -->
+          <div>
+
+            <label
+              for="{{ form.password.id_for_label }}"
+              class="block text-sm font-medium
+                     text-gray-300 mb-1.5"
+            >
+              {{ form.password.label }}
+            </label>
+
+            <div class="relative">
+
+              <!-- Lock icon -->
+              <div
+                class="absolute inset-y-0 left-0 pl-4
+                       flex items-center pointer-events-none"
+              >
+                <svg
+                  class="w-5 h-5 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                    d="M15 11V7a3 3 0 00-6 0v4m-2 0h10a2 2 0 012 2v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7a2 2 0 012-2z"
+                  />
+                </svg>
+              </div>
+
+
+              <!-- Password input -->
+              <input
+                type="password"
+                name="{{ form.password.html_name }}"
+                id="{{ form.password.id_for_label }}"
+                autocomplete="current-password"
+                required
+                placeholder="Enter your password"
+                aria-invalid="{% if form.password.errors %}true{% else %}false{% endif %}"
+                {% if form.password.errors %}
+                  aria-describedby="password-error"
+                {% endif %}
+                class="
+                  w-full h-12 pl-12 pr-12 rounded-xl
+                  bg-white/[0.035] border
+                  {% if form.password.errors %}
+                    border-red-500/60
+                  {% else %}
+                    border-white/10
+                  {% endif %}
+                  text-white placeholder-gray-600
+                  outline-none
+                  transition-all duration-200
+                  focus:border-amber-400/70
+                  focus:bg-white/[0.05]
+                  focus:ring-4 focus:ring-amber-400/5
+                "
+              />
+
+
+              <!-- Password toggle -->
+              <button
+                type="button"
+                id="passwordToggle"
+                class="absolute inset-y-0 right-0 px-3.5
+                       text-gray-500
+                       hover:text-amber-400
+                       transition-colors
+                       focus:outline-none
+                       focus:text-amber-400"
+                aria-label="Show password"
+                aria-pressed="false"
+              >
+
+                <!-- Eye -->
+                <svg
+                  id="eyeOpen"
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                    d="M2.46 12S5.82 5 12 5s9.54 7 9.54 7S18.18 19 12 19 2.46 12 2.46 12z"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                    stroke-width="1.7"
+                  />
+                </svg>
+
+
+                <!-- Eye off -->
+                <svg
+                  id="eyeClosed"
+                  class="w-5 h-5 hidden"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                    d="M3 3l18 18M10.58 10.58a2 2 0 002.84 2.84M9.88 5.09A10.72 10.72 0 0112 5c6.18 0 9.54 7 9.54 7a17.38 17.38 0 01-3.18 3.86M6.53 6.53C3.86 8.44 2.46 12 2.46 12s3.36 7 9.54 7a10.9 10.9 0 003.39-.54"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+            {% if form.password.errors %}
+              <p
+                id="password-error"
+                class="mt-1.5 text-xs text-red-400"
+              >
+                {{ form.password.errors.0 }}
+              </p>
+            {% endif %}
+
+          </div>
+
+
+          <!-- ===================================================
+               REMEMBER / FORGOT
+               =================================================== -->
+          <div class="flex items-center justify-between gap-4">
+
+            <label class="flex items-center gap-2 cursor-pointer">
+
+              <input
+                type="checkbox"
+                name="remember_me"
+                value="1"
+                {% if request.POST.remember_me %}
+                  checked
+                {% endif %}
+                class="
+                  w-4 h-4 rounded
+                  border-white/20
+                  bg-white/5
+                  text-amber-400
+                  focus:ring-amber-400/30
+                  focus:ring-offset-0
+                "
+              />
+
+              <span class="text-sm text-gray-500">
+                Remember me
+              </span>
+
+            </label>
+
+
+            <a
+              href="{% url 'accounts:password_reset' %}"
+              class="text-sm text-amber-400
+                     hover:text-amber-300
+                     transition-colors"
+            >
+              Forgot password?
+            </a>
+
+          </div>
+
+
+          <!-- ===================================================
+               SUBMIT
+               =================================================== -->
+          <button
+            type="submit"
+            class="
+              group w-full h-12 rounded-xl
+              bg-amber-400
+              hover:bg-amber-300
+              active:bg-amber-500
+              text-black
+              font-semibold
+              tracking-wide
+              transition-all duration-200
+              focus:outline-none
+              focus:ring-4 focus:ring-amber-400/20
+              shadow-lg shadow-amber-400/5
+            "
+          >
+
+            <span class="flex items-center justify-center gap-2">
+
+              <span>Sign in</span>
+
+              <svg
+                class="w-4 h-4 transition-transform duration-200
+                       group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 12h14M13 6l6 6-6 6"
+                />
+              </svg>
+
+            </span>
+
+          </button>
+
+        </form>
+
+
+        <!-- =====================================================
+             ADMIN RECOVERY
+             ===================================================== -->
+        <div class="mt-6 pt-5 border-t border-white/[0.07]">
+
+          <a
+            href="{% url 'accounts:admin_recovery_identify' %}"
+            class="
+              group flex items-center justify-center gap-2
+              text-xs text-gray-600
+              hover:text-gray-400
+              transition-colors
+            "
+          >
+
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.7"
+                d="M12 15v2m-6 5h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z"
+              />
+            </svg>
+
+            <span>
+              Main Administrator recovery
+            </span>
+
+          </a>
+
+        </div>
+
+
+        <!-- Mobile copyright -->
+        <p
+          class="lg:hidden text-center text-xs text-gray-700 mt-6"
+        >
+          © {% now "Y" %} Lolaire's Kitchen
+        </p>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+
+<!-- =========================================================
+     PASSWORD TOGGLE
+     ========================================================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const passwordInput = document.getElementById(
+    "{{ form.password.id_for_label }}"
+  );
+
+  const passwordToggle = document.getElementById("passwordToggle");
+  const eyeOpen = document.getElementById("eyeOpen");
+  const eyeClosed = document.getElementById("eyeClosed");
+
+  if (
+    !passwordInput ||
+    !passwordToggle ||
+    !eyeOpen ||
+    !eyeClosed
+  ) {
+    return;
+  }
+
+  passwordToggle.addEventListener("click", function () {
+    const isHidden = passwordInput.type === "password";
+
+    passwordInput.type = isHidden ? "text" : "password";
+
+    eyeOpen.classList.toggle("hidden", isHidden);
+    eyeClosed.classList.toggle("hidden", !isHidden);
+
+    passwordToggle.setAttribute(
+      "aria-label",
+      isHidden ? "Hide password" : "Show password"
+    );
+
+    passwordToggle.setAttribute(
+      "aria-pressed",
+      isHidden ? "true" : "false"
+    );
+
+    passwordInput.focus();
+  });
+});
+</script>
+
+{% endblock %}

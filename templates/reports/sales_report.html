@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Sales / Menu Performance — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <a href="{% url 'reports:home' %}" class="text-xs font-semibold text-brand hover:underline">&larr; Back to Reports</a>
+    <h1 class="font-display text-xl mt-2">Sales &amp; Menu Performance</h1>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="admin-card !p-0 overflow-hidden">
+        <p class="text-sm font-semibold px-5 py-4 border-b border-hairline">Best Selling Items</p>
+        <ul class="divide-y divide-hairline">
+            {% for item in best_selling %}
+            <li class="px-5 py-3 text-sm flex justify-between"><span class="font-medium">{{ item.name }}</span><span class="text-inksoft">{{ item.units_sold }} sold</span></li>
+            {% empty %}<li class="px-5 py-8 text-sm text-inksoft text-center">No sales yet.</li>{% endfor %}
+        </ul>
+    </div>
+    <div class="admin-card !p-0 overflow-hidden">
+        <p class="text-sm font-semibold px-5 py-4 border-b border-hairline">Least Selling Items</p>
+        <ul class="divide-y divide-hairline">
+            {% for item in least_selling %}
+            <li class="px-5 py-3 text-sm flex justify-between"><span class="font-medium">{{ item.name }}</span><span class="text-inksoft">{{ item.units_sold }} sold</span></li>
+            {% empty %}<li class="px-5 py-8 text-sm text-inksoft text-center">No sales yet.</li>{% endfor %}
+        </ul>
+    </div>
+    <div class="admin-card !p-0 overflow-hidden">
+        <p class="text-sm font-semibold px-5 py-4 border-b border-hairline">Revenue Per Item</p>
+        <ul class="divide-y divide-hairline">
+            {% for item in revenue_per_item %}
+            <li class="px-5 py-3 text-sm flex justify-between"><span class="font-medium">{{ item.name }}</span><span class="text-inksoft">₦{{ item.item_revenue }}</span></li>
+            {% empty %}<li class="px-5 py-8 text-sm text-inksoft text-center">No sales yet.</li>{% endfor %}
+        </ul>
+    </div>
+    <div class="admin-card !p-0 overflow-hidden">
+        <p class="text-sm font-semibold px-5 py-4 border-b border-hairline">Most Ordered Categories</p>
+        <ul class="divide-y divide-hairline">
+            {% for category in most_ordered_categories %}
+            <li class="px-5 py-3 text-sm flex justify-between"><span class="font-medium">{{ category.name }}</span><span class="text-inksoft">{{ category.units_ordered }} units</span></li>
+            {% empty %}<li class="px-5 py-8 text-sm text-inksoft text-center">No orders yet.</li>{% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

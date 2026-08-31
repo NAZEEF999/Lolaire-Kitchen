@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Audit Log — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+    <div>
+        <h1 class="font-display text-xl">Audit Log</h1>
+        <p class="text-inksoft text-sm mt-1">Security and admin actions — append-only, most recent first.</p>
+    </div>
+    <a href="{% url 'dashboard:staff_security' %}" class="text-xs font-semibold text-brand hover:underline">&larr; Back to Staff Security</a>
+</div>
+
+<div class="admin-card !p-0 overflow-hidden">
+    {% if entries %}
+    <ul class="divide-y divide-hairline max-h-[70vh] overflow-y-auto">
+        {% for entry in entries %}
+        <li class="px-5 py-4">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold">{{ entry.get_action_display }}</p>
+                    <p class="text-xs text-inksoft mt-0.5">
+                        {% if entry.target_user %}Target: {{ entry.target_user }}{% endif %}
+                        {% if entry.actor %} · By: {{ entry.actor }}{% else %} · By: System{% endif %}
+                    </p>
+                    {% if entry.description %}<p class="text-sm text-ink mt-2 whitespace-pre-line">{{ entry.description }}</p>{% endif %}
+                </div>
+                <p class="text-xs text-inksoft whitespace-nowrap">{{ entry.created_at|date:"M d, Y — g:ia" }}</p>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-inksoft text-sm p-10 text-center">No audit entries yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

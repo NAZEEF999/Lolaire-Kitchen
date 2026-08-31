@@ -1,0 +1,173 @@
+{% extends "storefront/base.html" %}
+{% block title %}Track Your Order — Lolaire's Kitchen{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+>
+{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-24 max-w-2xl mx-auto px-6">
+    <p class="eyebrow mb-6 reveal text-center">Order Status</p>
+    <h1 class="font-display text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-center reveal">Track your order.</h1>
+    <p class="text-center text-cream-white/50 mb-12 reveal">Enter both the phone number you checked out with and your order number — both are on your confirmation.</p>
+
+    <form method="post" class="flex flex-col sm:flex-row gap-4 mb-14 reveal">
+        {% csrf_token %}
+        <div class="flex-1">
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<p class="text-sm text-danger mt-1">{{ form.phone_number.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="flex-1">
+            {{ form.order_number }}
+            {% if form.order_number.errors %}<p class="text-sm text-danger mt-1">{{ form.order_number.errors.0 }}</p>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary whitespace-nowrap">Find My Order</button>
+    </form>
+
+    {% if searched %}
+        {% if order %}
+        <div class="reveal is-visible bg-cream-white rounded-2xl p-6 border border-ink/8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="font-display font-bold text-ink text-lg">#{{ order.order_number }}</p>
+                    <p class="text-sm text-ink/50">{{ order.created_at|date:"M d, Y — g:ia" }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-display font-bold text-ember text-lg">₦{{ order.total_amount }}</p>
+                    <p class="text-sm text-ink/50">{{ order.get_status_display }}</p>
+                </div>
+            </div>
+            <div class="border-t border-ink/8 pt-4 space-y-2">
+                {% for line in order.items.all %}
+                <div class="flex justify-between text-sm">
+                    <span class="text-ink/80">{{ line.quantity }}× {{ line.menu_item.name }}</span>
+                    <span class="text-ink/60">₦{{ line.line_total }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if order.delivery_address %}
+            <div class="border-t border-ink/8 pt-4 mt-4">
+                <p class="text-xs uppercase tracking-wide text-ink/40 font-semibold mb-1">Delivering to</p>
+                <p class="text-sm text-ink/80">{{ order.delivery_address }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if order.delivery_address and restaurant_settings.latitude and restaurant_settings.longitude %}
+        <div class="reveal is-visible mt-6">
+
+            <div
+                id="track-order-map"
+                class="w-full rounded-2xl overflow-hidden border border-cream-white/10"
+                style="height: 320px;"
+                role="img"
+                aria-label="Map showing the route from Lolaire's Kitchen to the delivery address"
+            ></div>
+
+            <a
+                id="get-directions-btn"
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-light w-full justify-center mt-4"
+            >
+                Get Directions &rarr;
+            </a>
+
+            <p class="text-xs text-cream-white/35 text-center mt-3">
+                This shows the general route between the restaurant and your delivery address —
+                it's a location map, not live rider tracking.
+            </p>
+
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+        (function () {
+            var restaurantLat = {{ restaurant_settings.latitude }};
+            var restaurantLng = {{ restaurant_settings.longitude }};
+            {% if order.delivery_latitude and order.delivery_longitude %}
+            var customerLat = {{ order.delivery_latitude }};
+            var customerLng = {{ order.delivery_longitude }};
+            {% else %}
+            var customerLat = null;
+            var customerLng = null;
+            {% endif %}
+
+            var mapEl = document.getElementById("track-order-map");
+            if (!mapEl || typeof L === "undefined") return;
+
+            var points = [[restaurantLat, restaurantLng]];
+            if (customerLat !== null && customerLng !== null) {
+                points.push([customerLat, customerLng]);
+            }
+
+            var map = L.map("track-order-map", { scrollWheelZoom: false });
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "&copy; OpenStreetMap contributors",
+                maxZoom: 19,
+            }).addTo(map);
+
+            L.marker([restaurantLat, restaurantLng])
+                .addTo(map)
+                .bindPopup("Lolaire's Kitchen");
+
+            if (customerLat !== null && customerLng !== null) {
+                L.marker([customerLat, customerLng])
+                    .addTo(map)
+                    .bindPopup("Delivery address");
+
+                L.polyline(points, { color: "#ab762a", weight: 3, dashArray: "6 8" }).addTo(map);
+            }
+
+            if (points.length > 1) {
+                map.fitBounds(points, { padding: [40, 40] });
+            } else {
+                map.setView(points[0], 14);
+            }
+
+            // "Get Directions" — a plain Google Maps deep link, no API
+            // key needed. Destination uses precise coordinates when we
+            // have them (geocoding succeeded), otherwise falls back to
+            // the typed address text, which Google Maps resolves fine
+            // on its own.
+            var destination = (customerLat !== null && customerLng !== null)
+                ? customerLat + "," + customerLng
+                : encodeURIComponent("{{ order.delivery_address|escapejs }}");
+
+            var directionsBtn = document.getElementById("get-directions-btn");
+            if (directionsBtn) {
+                directionsBtn.href =
+                    "https://www.google.com/maps/dir/?api=1&origin=" +
+                    restaurantLat + "," + restaurantLng +
+                    "&destination=" + destination;
+            }
+        })();
+        </script>
+        {% elif order.delivery_address %}
+        <div class="reveal is-visible mt-6 text-center py-8 border border-dashed border-cream-white/15 rounded-2xl">
+            <p class="text-cream-white/50 text-sm">
+                A map isn't available for this order yet — the restaurant's location
+                hasn't been configured. Directions can still be requested from your
+                delivery address once it is.
+            </p>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-20 border border-dashed border-cream-white/15 rounded-2xl reveal is-visible">
+            <p class="font-display text-2xl mb-2">No matching order.</p>
+            <p class="text-cream-white/50">Double-check the phone number and order number match your confirmation exactly.</p>
+        </div>
+        {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

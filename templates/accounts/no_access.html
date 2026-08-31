@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Access Yet — Lolaire's Kitchen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { appbg: '#F8F7F4', surface: '#FFFFFF', ink: '#201B15', inksoft: '#6B6154', brand: { DEFAULT: '#B4802F', 50: '#FBF3E7' }, hairline: '#E7E3DA' },
+    fontFamily: { display: ['Fraunces', 'serif'], body: ['Manrope', 'sans-serif'] },
+  } } }
+</script>
+</head>
+<body class="bg-appbg text-ink font-body antialiased min-h-screen flex items-center justify-center">
+
+<div class="max-w-sm w-full mx-auto px-6 text-center">
+    <div class="w-12 h-12 rounded-full bg-brand-50 text-brand flex items-center justify-center mx-auto mb-5">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    </div>
+    <h1 class="font-display text-2xl mb-2">Nothing's turned on yet</h1>
+    <p class="text-inksoft text-sm mb-8">
+        You're logged in as <strong>{{ user.get_full_name|default:user.username }}</strong>, but your account doesn't
+        have Dashboard or Admin Panel access yet. Ask the Main Administrator to turn on access for you.
+    </p>
+    <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="border border-hairline rounded-full px-6 py-3 text-sm font-semibold hover:bg-surface transition-colors">
+            Log out
+        </button>
+    </form>
+</div>
+
+</body>
+</html>

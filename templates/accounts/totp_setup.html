@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Two-Factor Authentication — Restaurant Management System{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-16 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+    <h1 class="text-xl font-semibold mb-2">Two-factor authentication</h1>
+
+    {% if totp_enabled %}
+        <p class="text-sm text-gray-600 mb-6">
+            2FA is <span class="font-semibold text-accent">enabled</span> on your account. If you lose access to your
+            authenticator app, backup codes let you recover your account without it.
+        </p>
+        <form method="post" action="{% url 'accounts:totp_backup_codes_regenerate' %}"
+              onsubmit="return confirm('This invalidates all of your existing backup codes and issues a new set. Continue?');">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-gray-100 text-gray-800 rounded-md py-2 text-sm font-medium hover:bg-gray-200">
+                Regenerate backup codes
+            </button>
+        </form>
+        <p class="text-xs text-gray-500 mt-3">
+            Setting up 2FA again below will replace your current secret — only do this if you're switching authenticator apps.
+        </p>
+    {% else %}
+        <p class="text-sm text-gray-600 mb-6">
+            Set this up so a lost or forgotten password can be safely recovered — this is what
+            <a href="{% url 'accounts:admin_recovery_identify' %}" class="text-blue-600 hover:underline">Main Administrator recovery</a>
+            uses instead of an email link.
+        </p>
+    {% endif %}
+
+    {% if pending_secret %}
+    <div class="border-t border-gray-200 mt-6 pt-6">
+        <p class="text-sm font-medium mb-2">1. Add this key to your authenticator app</p>
+        <p class="text-xs text-gray-500 mb-2">Google Authenticator, Microsoft Authenticator, or any standard TOTP app — choose "enter a setup key manually".</p>
+        <p class="font-mono text-sm bg-gray-50 border border-gray-200 rounded-md p-3 tracking-widest break-all">{{ pending_secret }}</p>
+
+        <p class="text-sm font-medium mt-6 mb-2">2. Enter the 6-digit code it shows</p>
+        <form method="post" action="{% url 'accounts:totp_setup_confirm' %}" class="flex gap-2">
+            {% csrf_token %}
+            {{ confirm_form.code }}
+            <button type="submit" class="bg-blue-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-blue-700 whitespace-nowrap">
+                Enable 2FA
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <input type="hidden" name="intent" value="generate">
+        <button type="submit" class="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700">
+            {% if totp_enabled %}Generate a new setup key{% else %}Get started{% endif %}
+        </button>
+    </form>
+    {% endif %}
+
+    <a href="{% url 'dashboard:staff_security' %}" class="block mt-6 text-sm text-blue-600 hover:underline">&larr; Back to Staff Security</a>
+</div>
+{% endblock %}

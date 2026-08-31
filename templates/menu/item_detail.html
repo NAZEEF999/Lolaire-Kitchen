@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ menu_item.name }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-lg admin-card">
+    <p class="text-xs text-inksoft">{{ menu_item.category.name }}</p>
+    <div class="flex items-center justify-between mb-2">
+        <h1 class="font-display text-xl">{{ menu_item.name }}</h1>
+        {% if menu_item.is_featured %}<span class="badge badge-brand">Featured</span>{% endif %}
+    </div>
+    <p class="text-sm text-inksoft mb-4">{{ menu_item.description|default:"No description yet." }}</p>
+    <p class="font-display text-lg mb-2">₦{{ menu_item.price }}</p>
+    <span class="badge {% if menu_item.is_available %}badge-accent{% else %}badge-critical{% endif %}">
+        {{ menu_item.is_available|yesno:"Available,Unavailable" }}
+    </span>
+
+    {% if can_edit or can_delete %}
+    <div class="flex gap-4 mt-6 pt-4 border-t border-hairline">
+        {% if can_edit %}<a href="{% url 'menu:item_update' menu_item.slug %}" class="text-sm font-semibold text-brand hover:underline">Edit</a>{% endif %}
+        {% if can_delete %}<a href="{% url 'menu:item_delete' menu_item.slug %}" class="text-sm font-semibold text-critical hover:underline">Delete</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

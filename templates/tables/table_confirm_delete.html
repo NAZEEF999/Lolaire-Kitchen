@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ object }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-sm admin-card">
+    <h1 class="font-display text-lg mb-3">Delete "{{ object }}"?</h1>
+    <p class="text-sm text-inksoft mb-6">
+        This deactivates the table — it can be restored later from Django Admin.
+        Occupied tables cannot be deleted; change the status first.
+    </p>
+    <form method="post" class="flex items-center gap-4">
+        {% csrf_token %}
+        <button type="submit" class="bg-critical text-white rounded-full px-5 py-2.5 text-sm font-semibold hover:opacity-90">
+            Confirm Delete
+        </button>
+        <a href="{% url 'tables:detail' object.pk %}" class="text-sm font-semibold text-inksoft hover:text-ink">Cancel</a>
+    </form>
+</div>
+{% endblock %}

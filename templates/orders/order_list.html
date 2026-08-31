@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Orders — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="font-display text-xl">Orders</h1>
+        <p class="text-inksoft text-sm mt-1">Every order placed, in-house or online.</p>
+    </div>
+    {% if can_create %}
+    <a href="{% url 'orders:create' %}" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+        + New Order
+    </a>
+    {% endif %}
+</div>
+
+<form method="get" class="admin-card flex flex-wrap gap-3 mb-6 !py-4">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search order # or customer..."
+           class="flex-1 min-w-[200px] rounded-md border border-hairline px-3 py-2 text-sm">
+    <select name="status" class="rounded-md border border-hairline px-3 py-2 text-sm">
+        <option value="">Any status</option>
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    {% if can_see_payments %}
+    <select name="payment_status" class="rounded-md border border-hairline px-3 py-2 text-sm">
+        <option value="">Any payment status</option>
+        {% for value, label in payment_status_choices %}
+            <option value="{{ value }}" {% if value == selected_payment_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+    <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-medium hover:bg-hairline/40">
+        Filter
+    </button>
+</form>
+
+<div class="admin-card !p-0 overflow-hidden overflow-x-auto">
+    <table class="admin-table min-w-[720px]">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Customer / Table</th>
+                <th>Status</th>
+                {% if can_see_payments %}<th>Payment</th><th>Total</th>{% endif %}
+                <th>Placed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr class="cursor-pointer" onclick="window.location='{{ order.get_absolute_url }}'">
+                <td class="font-semibold">#{{ order.order_number }}</td>
+                <td class="text-inksoft">
+                    {% if order.customer %}{{ order.customer.full_name }}{% endif %}
+                    {% if order.table %} · Table {{ order.table.table_number }}{% elif not order.customer %}Walk-in{% endif %}
+                </td>
+                <td><span class="badge {% if order.status == 'served' %}badge-accent{% elif order.status == 'cancelled' %}badge-critical{% else %}badge-warning{% endif %}">{{ order.get_status_display }}</span></td>
+                {% if can_see_payments %}
+                <td><span class="badge {% if order.payment_status == 'paid' %}badge-accent{% elif order.payment_status == 'cancelled' %}badge-critical{% elif order.payment_status == 'refunded' %}badge-info{% else %}badge-warning{% endif %}">{{ order.get_payment_status_display }}</span></td>
+                <td class="font-medium">₦{{ order.total_amount }}</td>
+                {% endif %}
+                <td class="text-inksoft">{{ order.created_at|timesince }} ago</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="{% if can_see_payments %}6{% else %}4{% endif %}" class="text-center py-10 text-inksoft">No orders yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="flex gap-4 mt-6 text-sm items-center">
+    {% if page_obj.has_previous %}
+        <a href="?q={{ query }}&status={{ selected_status }}&page={{ page_obj.previous_page_number }}" class="font-semibold text-brand hover:underline">Previous</a>
+    {% endif %}
+    <span class="text-inksoft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?q={{ query }}&status={{ selected_status }}&page={{ page_obj.next_page_number }}" class="font-semibold text-brand hover:underline">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

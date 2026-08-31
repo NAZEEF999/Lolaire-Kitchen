@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Supplier — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+    <h1 class="font-display text-xl mb-6">{% if object %}Edit {{ object.name }}{% else %}Add Supplier{% endif %}</h1>
+    <div class="admin-card">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<p class="text-sm text-critical mt-1">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+                Save
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

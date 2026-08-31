@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ table }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-md">
+    <div class="admin-card mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h1 class="font-display text-xl">{{ table }}</h1>
+            <span class="badge
+                {% if table.status == 'available' %}badge-accent
+                {% elif table.status == 'occupied' %}badge-critical
+                {% elif table.status == 'reserved' %}badge-warning
+                {% else %}badge-neutral{% endif %}">
+                {{ table.get_status_display }}
+            </span>
+        </div>
+        <p class="text-sm text-inksoft">Capacity: {{ table.capacity }}</p>
+        <p class="text-sm text-inksoft">Location: {{ table.location|default:"—" }}</p>
+        {% if table.notes %}<p class="text-sm text-inksoft mt-2">Notes: {{ table.notes }}</p>{% endif %}
+
+        {% if can_edit or can_delete %}
+        <div class="flex gap-4 mt-5 pt-4 border-t border-hairline">
+            {% if can_edit %}<a href="{% url 'tables:update' table.pk %}" class="text-sm font-semibold text-brand hover:underline">Edit</a>{% endif %}
+            {% if can_delete %}<a href="{% url 'tables:delete' table.pk %}" class="text-sm font-semibold text-critical hover:underline">Delete</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">Change Status</p>
+        <form method="post" action="{% url 'tables:status_update' table.pk %}" class="flex gap-3">
+            {% csrf_token %}
+            {{ status_form.status }}
+            <button type="submit" class="btn-admin-primary text-white px-4 py-2 rounded-md text-sm font-semibold">
+                Update
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

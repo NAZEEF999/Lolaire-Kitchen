@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Payments — Lolaire's Kitchen Admin{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h2 class="font-display text-xl">Payments</h2>
+        <p class="text-inksoft text-sm">Derived from order payment status — the most recent 100 orders.</p>
+    </div>
+    <form method="get" class="flex items-center gap-2">
+        <select name="payment_status" onchange="this.form.submit()" class="text-sm border border-hairline rounded-lg px-3 py-2 bg-surface focus:outline-none focus:ring-2 focus:ring-brand/40">
+            <option value="">All statuses</option>
+            <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>Pending</option>
+            <option value="paid" {% if selected_status == "paid" %}selected{% endif %}>Paid</option>
+            <option value="refunded" {% if selected_status == "refunded" %}selected{% endif %}>Refunded</option>
+            <option value="cancelled" {% if selected_status == "cancelled" %}selected{% endif %}>Cancelled</option>
+        </select>
+    </form>
+</div>
+
+<div class="admin-card !p-0 overflow-hidden overflow-x-auto">
+    {% if orders %}
+    <table class="admin-table min-w-[720px]">
+        <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td class="font-medium">{{ order.order_number }}</td>
+                <td>{{ order.customer.full_name|default:"Walk-in" }}</td>
+                <td>₦{{ order.total_amount }}</td>
+                <td>{{ order.get_payment_method_display|default:"—" }}</td>
+                <td>
+                    <span class="badge {% if order.payment_status == 'paid' %}badge-accent{% elif order.payment_status == 'cancelled' %}badge-critical{% elif order.payment_status == 'refunded' %}badge-info{% else %}badge-warning{% endif %}">
+                        {{ order.get_payment_status_display }}
+                    </span>
+                </td>
+                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-inksoft text-sm p-10 text-center">No orders {% if selected_status %}with this payment status{% endif %} yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

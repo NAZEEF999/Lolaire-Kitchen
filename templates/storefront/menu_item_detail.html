@@ -1,0 +1,63 @@
+{% extends "storefront/base.html" %}
+{% block title %}{{ menu_item.name }} — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<section class="pt-32 pb-24 max-w-7xl mx-auto px-6 lg:px-10">
+    <a href="{% url 'storefront:menu' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-cream-white/60 hover:text-cream-white mb-10 transition">
+        &larr; Back to Menu
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-start">
+        <div class="reveal aspect-square rounded-2xl overflow-hidden">
+            {% if menu_item.image %}
+                <img src="{{ menu_item.image.url }}" alt="{{ menu_item.name }}" class="w-full h-full object-cover">
+            {% else %}
+                <div class="image-placeholder w-full h-full">
+                    <span class="font-display text-xl">{{ menu_item.name }}</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="reveal">
+            <p class="eyebrow mb-4">{{ menu_item.category.name }}</p>
+            <h1 class="font-display text-4xl lg:text-5xl font-bold tracking-tight mb-6">{{ menu_item.name }}</h1>
+            <p class="text-cream-white/60 leading-relaxed mb-8">{{ menu_item.description|default:"A Lolaire's Kitchen favorite, made fresh to order." }}</p>
+            <p class="font-display text-3xl font-bold text-ember mb-10">₦{{ menu_item.price }}</p>
+
+            <form method="post" action="{% url 'storefront:cart_add' %}" class="flex items-center gap-4">
+                {% csrf_token %}
+                <input type="hidden" name="menu_item_id" value="{{ menu_item.pk }}">
+                <div class="qty-stepper" data-qty-adjust>
+                    <button type="button" data-qty-step="-1">&minus;</button>
+                    <input type="number" name="quantity" value="1" min="1" class="w-12 text-center bg-transparent focus:outline-none" readonly>
+                    <button type="button" data-qty-step="1">+</button>
+                </div>
+                <button type="submit" class="btn btn-primary">Add to Cart</button>
+            </form>
+        </div>
+    </div>
+
+    {% if related_items %}
+    <div class="mt-24">
+        <h2 class="font-display text-2xl font-bold mb-8 reveal">You might also like</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {% for item in related_items %}
+            <a href="{% url 'storefront:menu_item_detail' item.slug %}" class="dish-card block reveal">
+                <div class="dish-image-wrap aspect-[4/3]">
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="image-placeholder w-full h-full"><span class="font-display text-sm">{{ item.name }}</span></div>
+                    {% endif %}
+                </div>
+                <div class="p-5">
+                    <h3 class="font-display text-lg font-bold mb-1">{{ item.name }}</h3>
+                    <p class="font-display text-ember font-bold">₦{{ item.price }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

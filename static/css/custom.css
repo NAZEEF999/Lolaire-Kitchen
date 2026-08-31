@@ -1,0 +1,138 @@
+/* Project-wide custom CSS for the admin dashboard.
+   Tailwind is loaded via CDN in base.html — these are the small set
+   of reusable component classes (nav items, badges, cards, tables)
+   shared across every admin page, so markup doesn't repeat the same
+   long utility strings on every template. */
+
+/* Sidebar shell — hardcoded here (not left to the Tailwind CDN's
+   runtime-generated `bg-sidebar` / `text-sidebartext` / `border-sidebarline`
+   utilities) because those depend on a third-party script finishing before
+   paint. If it's slow/blocked, the sidebar background never applies and the
+   nav text/icons end up invisible against whatever's behind it. This file
+   is a normal stylesheet — it always loads. */
+#app-sidebar { background-color: #16161B; }
+.sidebar-divider { border-color: #2A2A33; }
+.sidebar-hover { background-color: #202027; }
+.sidebar-text-muted { color: #9E9EAA; }
+.sidebar-text-muted:hover { color: #FFFFFF; }
+.sidebar-brand-chip { background-color: rgba(180, 128, 47, 0.2); color: #B4802F; }
+.sidebar-brand-panel { background-color: rgba(180, 128, 47, 0.1); border-color: rgba(180, 128, 47, 0.3); color: #B4802F; }
+.sidebar-brand-panel:hover { background-color: rgba(180, 128, 47, 0.2); }
+
+/* Sidebar nav item — dark shell, see the `sidebar*` Tailwind tokens */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  color: #9E9EAA;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.sidebar-nav-item:hover {
+  background-color: #202027;
+  color: #FFFFFF;
+}
+.sidebar-nav-item-active {
+  background-color: #2A2A33;
+  color: #FFFFFF;
+}
+.sidebar-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+.sidebar-badge-critical { background: #B23B34; }
+.sidebar-badge-warning  { background: #B8590A; }
+.nav-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+/* Stat / content cards */
+.admin-card {
+  background: #FFFFFF;
+  border: 1px solid #E7E3DA;
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+}
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.badge-neutral   { background: #F8F7F4; color: #6B6154; }
+.badge-brand     { background: #FBF3E7; color: #B4802F; }
+.badge-accent    { background: #EAF4F1; color: #2F6F5E; }
+.badge-warning   { background: #FEF3E2; color: #B8590A; }
+.badge-info      { background: #EAF1FB; color: #2A5C99; }
+.badge-critical  { background: #FBECEB; color: #B23B34; }
+
+/* Status color system (used by Live Activity, notifications, and any
+   status-driven UI): success=green (healthy/complete), warning=amber
+   (needs attention), critical=red (a genuine problem), info=blue
+   (purely informational). Used sparingly — see badge-* above for the
+   pill version of the same palette. */
+.status-dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; flex-shrink: 0; display: inline-block; }
+.status-dot-success  { background: #2F6F5E; }
+.status-dot-warning  { background: #B8590A; }
+.status-dot-critical { background: #B23B34; }
+.status-dot-info     { background: #2A5C99; }
+
+.stat-card-warning  { border-left: 3px solid #B8590A; }
+.stat-card-critical { border-left: 3px solid #B23B34; }
+.stat-card-success  { border-left: 3px solid #2F6F5E; }
+
+/* Notification bell + toast */
+.notif-toast {
+  animation: notif-slide-in 0.25s ease-out;
+}
+@keyframes notif-slide-in {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Data tables */
+.admin-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
+.admin-table thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6B6154;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #E7E3DA;
+}
+.admin-table tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #E7E3DA;
+  vertical-align: middle;
+}
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover { background-color: #F8F7F4; }
+
+.btn-admin-primary {
+  background-color: #201B15;
+  color: #FFFFFF;
+  transition: background-color 0.2s ease;
+}
+.btn-admin-primary:hover { background-color: #B4802F; }

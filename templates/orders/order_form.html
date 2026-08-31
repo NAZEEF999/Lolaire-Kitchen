@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}New Order — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+
+    <div class="mb-6">
+        <p class="text-xs uppercase tracking-[0.2em] text-brand font-semibold">
+            Orders
+        </p>
+
+        <h1 class="font-display text-2xl mt-1">
+            New Order
+        </h1>
+
+        <p class="text-sm text-inksoft mt-1">
+            Start an order for a customer and assign a table.
+        </p>
+    </div>
+
+
+    <div class="admin-card">
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Customer -->
+            <div>
+                <label
+                    for="{{ form.customer.id_for_label }}"
+                    class="block text-sm font-medium mb-1"
+                >
+                    Customer
+                </label>
+
+                <div class="flex gap-2">
+
+                    <div class="flex-1">
+                        {{ form.customer }}
+
+                        {% if form.customer.errors %}
+                            <p class="text-sm text-critical mt-1">
+                                {{ form.customer.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="document.getElementById('customerModal').classList.remove('hidden')"
+                        class="flex-shrink-0 px-4 py-2 rounded-md
+                               border border-brand text-brand
+                               text-sm font-semibold
+                               hover:bg-brand hover:text-white
+                               transition"
+                    >
+                        + Add Customer
+                    </button>
+
+                </div>
+            </div>
+
+
+            <!-- Table -->
+            <div>
+                <label
+                    for="{{ form.table.id_for_label }}"
+                    class="block text-sm font-medium mb-1"
+                >
+                    Table
+                </label>
+
+                {{ form.table }}
+
+                {% if form.table.errors %}
+                    <p class="text-sm text-critical mt-1">
+                        {{ form.table.errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+
+
+            <!-- Notes -->
+            <div>
+                <label
+                    for="{{ form.notes.id_for_label }}"
+                    class="block text-sm font-medium mb-1"
+                >
+                    Notes
+                </label>
+
+                {{ form.notes }}
+
+                {% if form.notes.errors %}
+                    <p class="text-sm text-critical mt-1">
+                        {{ form.notes.errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn-admin-primary text-white
+                       px-5 py-2.5 rounded-full
+                       text-sm font-semibold"
+            >
+                Start Order
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     CUSTOMER MODAL
+     ========================================================= -->
+<div
+    id="customerModal"
+    class="hidden fixed inset-0 z-50
+           bg-black/50 backdrop-blur-sm
+           flex items-center justify-center
+           p-4"
+>
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl">
+
+        <div class="flex items-center justify-between
+                    px-6 py-4 border-b border-hairline">
+
+            <div>
+                <h2 class="font-display text-lg">
+                    Add New Customer
+                </h2>
+
+                <p class="text-sm text-inksoft mt-1">
+                    Create a customer without leaving the order.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onclick="document.getElementById('customerModal').classList.add('hidden')"
+                class="text-inksoft hover:text-ink text-xl"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            method="post"
+            action="{% url 'customers:create' %}"
+            class="p-6 space-y-4"
+        >
+            {% csrf_token %}
+
+            {% for field in customer_form %}
+                {% if field.name != "is_active" %}
+
+                    <div>
+                        <label
+                            for="{{ field.id_for_label }}"
+                            class="block text-sm font-medium mb-1"
+                        >
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <p class="text-sm text-critical mt-1">
+                                {{ field.errors.0 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                {% endif %}
+            {% endfor %}
+
+
+            <div class="flex justify-end gap-3 pt-3">
+
+                <button
+                    type="button"
+                    onclick="document.getElementById('customerModal').classList.add('hidden')"
+                    class="px-4 py-2 rounded-full
+                           border border-hairline
+                           text-sm font-semibold"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-admin-primary text-white
+                           px-5 py-2 rounded-full
+                           text-sm font-semibold"
+                >
+                    Create Customer
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

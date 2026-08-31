@@ -1,0 +1,89 @@
+{% comment %} Topbar — mobile sidebar toggle, page title, search, Quick Actions, notifications, profile menu. {% endcomment %}
+<header class="h-16 bg-surface border-b border-hairline flex items-center gap-4 px-4 sm:px-6 sticky top-0 z-20">
+
+    <button id="sidebar-toggle" class="lg:hidden text-inksoft hover:text-ink -ml-1 p-1.5" aria-label="Toggle menu">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path stroke-linecap="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+        </svg>
+    </button>
+
+    <h1 class="hidden sm:block font-display text-lg shrink-0 capitalize">
+        {% if page_title %}{{ page_title }}
+        {% elif request.resolver_match.app_name == "orders" %}Orders
+        {% elif request.resolver_match.view_name == "reservations:list" %}Reservations
+        {% elif request.resolver_match.view_name == "menu:item_list" %}Menu
+        {% elif request.resolver_match.view_name == "menu:category_list" %}Categories
+        {% elif request.resolver_match.app_name == "customers" %}Customers
+        {% elif request.resolver_match.app_name == "tables" %}Tables
+        {% elif request.resolver_match.app_name == "inventory" %}Inventory
+        {% elif request.resolver_match.view_name == "dashboard:staff_list" %}Staff
+        {% elif request.resolver_match.view_name == "dashboard:payments_list" %}Payments
+        {% elif request.resolver_match.app_name == "reports" %}Reports
+        {% elif request.resolver_match.view_name == "dashboard:settings" %}Settings
+        {% else %}Overview
+        {% endif %}
+    </h1>
+
+    <div class="flex-1 max-w-md ml-auto lg:ml-6">
+        <div class="relative">
+            <svg class="w-4 h-4 text-inksoft absolute left-3.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
+            <input type="search" placeholder="Search anything..." class="w-full bg-appbg border border-hairline rounded-full pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand">
+        </div>
+    </div>
+
+    {% if quick_actions %}
+    <div class="relative hidden sm:block">
+        <button id="quick-actions-btn" class="flex items-center gap-1.5 bg-ink text-white rounded-full pl-3.5 pr-2.5 py-2 text-sm font-semibold hover:bg-ink/90">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            Quick Actions
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="quick-actions-panel" class="hidden absolute right-0 mt-2 w-56 bg-white border border-hairline rounded-lg shadow-lg z-30 py-1.5">
+            {% for action in quick_actions %}
+            <a href="{{ action.url }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-appbg">
+                <svg class="w-4 h-4 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                {{ action.label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="flex items-center gap-1">
+        <button id="notif-mute-toggle" class="text-inksoft hover:text-ink p-1.5" aria-label="Mute notification sounds" title="Mute notification sounds">
+            <svg id="notif-mute-icon-on" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 8a5 5 0 010 8M19 5a9 9 0 010 14"/></svg>
+            <svg id="notif-mute-icon-off" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path stroke-linecap="round" d="M16 9l5 6M21 9l-5 6"/></svg>
+        </button>
+
+        <div class="relative">
+            <button id="notif-bell-btn" class="relative text-inksoft hover:text-ink p-1.5" aria-label="Notifications">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M9.5 19a2.5 2.5 0 005 0"/></svg>
+                <span id="notif-bell-count" class="hidden absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] px-1 bg-critical text-white text-[0.65rem] font-bold rounded-full items-center justify-center">0</span>
+            </button>
+            <div id="notif-bell-panel" class="hidden absolute right-0 mt-2 w-80 max-w-[90vw] bg-white border border-hairline rounded-lg shadow-lg z-30 max-h-96 overflow-y-auto">
+                <p class="text-xs font-semibold uppercase tracking-wide text-inksoft px-4 py-3 border-b border-hairline">Notifications</p>
+                <div id="notif-bell-list"></div>
+                <p id="notif-bell-empty" class="text-sm text-inksoft text-center py-8">Nothing new right now.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="notif-toast-container" class="fixed top-4 right-4 z-50 space-y-2 w-80 max-w-[90vw]"></div>
+
+    <div class="relative pl-3 border-l border-hairline">
+        <button id="profile-menu-btn" class="flex items-center gap-1.5">
+            <span class="w-8 h-8 rounded-full bg-brand-50 text-brand flex items-center justify-center font-semibold text-xs shrink-0">
+                {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+            </span>
+            <svg class="w-3.5 h-3.5 text-inksoft hidden sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="profile-menu-panel" class="hidden absolute right-0 mt-2 w-48 bg-white border border-hairline rounded-lg shadow-lg z-30 py-1.5">
+            <p class="px-4 py-2 text-xs text-inksoft truncate border-b border-hairline mb-1">{{ user.get_full_name|default:user.username }}</p>
+            <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm hover:bg-appbg">Profile</a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-critical hover:bg-critical-50">Log out</button>
+            </form>
+        </div>
+    </div>
+</header>

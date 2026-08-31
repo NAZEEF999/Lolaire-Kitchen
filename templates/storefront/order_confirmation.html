@@ -1,0 +1,37 @@
+{% extends "storefront/base.html" %}
+{% block title %}Order Confirmed — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-24 max-w-3xl mx-auto px-6 text-center">
+    <div class="reveal is-visible w-16 h-16 mx-auto mb-8 rounded-full bg-ember/10 flex items-center justify-center text-ember">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    </div>
+    <p class="eyebrow mb-4">Order Placed</p>
+    <h1 class="font-display text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">Thank you, {{ order.customer.full_name }}.</h1>
+    <p class="text-cream-white/60 mb-2">Your order is in the kitchen's hands.</p>
+    <p class="font-display text-lg font-bold text-ember mb-14">Order #{{ order.order_number }}</p>
+
+    <div class="bg-cream-white rounded-2xl p-8 border border-ink/8 text-left mb-10">
+        <p class="eyebrow text-xs mb-6">Order Summary</p>
+        <div class="space-y-4 mb-6">
+            {% for item in order.items.all %}
+            <div class="flex justify-between text-sm">
+                <span class="text-ink/70">{{ item.quantity }}&times; {{ item.menu_item.name }}</span>
+                <span class="font-semibold text-ink">₦{{ item.line_total }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="border-t border-ink/10 pt-4 flex justify-between items-baseline">
+            <span class="font-display font-bold text-ink">Total</span>
+            <span class="font-display text-2xl font-bold text-ember">₦{{ order.total_amount }}</span>
+        </div>
+    </div>
+
+    <p class="text-sm text-cream-white/50 mb-10">
+        Save your phone number — you can track this order anytime from
+        <a href="{% url 'storefront:order_lookup' %}" class="text-ember font-semibold hover:underline">Track Order</a>.
+    </p>
+
+    <a href="{% url 'storefront:menu' %}" class="btn btn-primary">Order Something Else</a>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="mb-6">
+    <h1 class="font-display text-xl">{{ category.name }}</h1>
+    <p class="text-sm text-inksoft mt-1">{{ category.description|default:"No description yet." }}</p>
+    {% if can_edit or can_delete %}
+    <div class="flex gap-4 mt-3">
+        {% if can_edit %}<a href="{% url 'menu:category_update' category.slug %}" class="text-sm font-semibold text-brand hover:underline">Edit</a>{% endif %}
+        {% if can_delete %}<a href="{% url 'menu:category_delete' category.slug %}" class="text-sm font-semibold text-critical hover:underline">Delete</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for item in menu_items %}
+    <a href="{{ item.get_absolute_url }}" class="admin-card hover:border-brand/40 transition-colors">
+        <p class="font-semibold">{{ item.name }}</p>
+        <p class="text-sm text-inksoft mt-1">₦{{ item.price }}</p>
+    </a>
+    {% empty %}
+    <p class="text-inksoft text-sm">No items in this category yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Main Administrator Recovery — Restaurant Management System{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto mt-16 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+    <h1 class="text-xl font-semibold mb-2">Main Administrator recovery</h1>
+    <p class="text-sm text-gray-500 mb-6">For the Main Administrator account only. Regular staff should use the standard "Forgot password" link instead.</p>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700">
+            Continue
+        </button>
+    </form>
+    <a href="{% url 'accounts:login' %}" class="block mt-6 text-sm text-blue-600 hover:underline">&larr; Back to login</a>
+</div>
+{% endblock %}

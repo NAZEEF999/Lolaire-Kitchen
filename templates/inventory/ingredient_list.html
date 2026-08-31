@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Inventory — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="font-display text-xl">Inventory</h1>
+        {% if low_stock_count %}<p class="text-sm text-warning font-medium mt-1">{{ low_stock_count }} ingredient{{ low_stock_count|pluralize }} low on stock</p>{% endif %}
+    </div>
+    <div class="flex items-center gap-4">
+        <a href="{% url 'inventory:supplier_list' %}" class="text-sm font-semibold text-brand hover:underline">Suppliers</a>
+        {% if can_create %}
+        <a href="{% url 'inventory:ingredient_create' %}" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+            + Add Ingredient
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="get" class="admin-card flex flex-wrap gap-3 mb-6 !py-4">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search ingredients..."
+           class="flex-1 min-w-[200px] rounded-md border border-hairline px-3 py-2 text-sm">
+    <select name="supplier" class="rounded-md border border-hairline px-3 py-2 text-sm">
+        <option value="">All suppliers</option>
+        {% for supplier in suppliers %}
+        <option value="{{ supplier.pk }}" {% if request.GET.supplier == supplier.pk|stringformat:"s" %}selected{% endif %}>{{ supplier.name }}</option>
+        {% endfor %}
+    </select>
+    <label class="flex items-center gap-2 text-sm border border-hairline rounded-md px-3 py-2">
+        <input type="checkbox" name="low_stock" value="1" {% if low_stock_only %}checked{% endif %}>
+        Low stock only
+    </label>
+    <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-medium hover:bg-hairline/40">
+        Filter
+    </button>
+</form>
+
+<div class="admin-card !p-0 overflow-hidden overflow-x-auto">
+    <table class="admin-table">
+        <thead>
+            <tr><th>Ingredient</th><th>Stock</th><th>Threshold</th><th>Supplier</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for ingredient in ingredients %}
+            <tr class="{% if ingredient.is_low_stock %}bg-warning-50{% endif %}">
+                <td>
+                    <a href="{% url 'inventory:ingredient_detail' ingredient.pk %}" class="font-semibold hover:text-brand">{{ ingredient.name }}</a>
+                </td>
+                <td>{{ ingredient.quantity_in_stock }} {{ ingredient.unit }}</td>
+                <td class="text-inksoft">{{ ingredient.low_stock_threshold }} {{ ingredient.unit }}</td>
+                <td class="text-inksoft">{{ ingredient.supplier|default:"—" }}</td>
+                <td class="text-right">
+                    {% if ingredient.is_low_stock %}<span class="badge badge-warning">Low stock</span>{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center py-10 text-inksoft">No ingredients yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="flex gap-4 mt-6 text-sm items-center">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="font-semibold text-brand hover:underline">Previous</a>
+    {% endif %}
+    <span class="text-inksoft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="font-semibold text-brand hover:underline">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

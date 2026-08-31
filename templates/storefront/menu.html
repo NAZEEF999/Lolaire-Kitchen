@@ -1,0 +1,80 @@
+{% extends "storefront/base.html" %}
+{% load static %}
+{% block title %}Menu — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+
+<section class="bg-ink text-cream-white pt-40 pb-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <p class="eyebrow eyebrow-light mb-6 reveal">The Full Menu</p>
+        <h1 class="font-display text-5xl lg:text-7xl font-extrabold tracking-tight reveal">Every dish,<br>made to order.</h1>
+    </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 lg:px-10 py-16">
+    <form method="get" id="menu-filter-form" class="flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between mb-14">
+        <input type="hidden" name="category" value="{{ selected_category }}">
+
+        <div class="flex flex-wrap gap-3">
+            <button type="button" data-category-pill="" class="px-5 py-2.5 rounded-full text-sm font-semibold border transition
+                {% if not selected_category %}bg-ember text-ink border-ember{% else %}bg-transparent text-cream-white/70 border-cream-white/15 hover:border-ember hover:text-cream-white{% endif %}">
+                All
+            </button>
+            {% for category in categories %}
+            <button type="button" data-category-pill="{{ category.slug }}" class="px-5 py-2.5 rounded-full text-sm font-semibold border transition
+                {% if selected_category == category.slug %}bg-ember text-ink border-ember{% else %}bg-transparent text-cream-white/70 border-cream-white/15 hover:border-ember hover:text-cream-white{% endif %}">
+                {{ category.name }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="relative w-full lg:w-72">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search dishes..."
+                   class="w-full rounded-full border border-cream-white/15 bg-ink-soft text-cream-white placeholder:text-cream-white/35 px-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ember/50">
+            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-cream-white/40">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+    </form>
+
+    {% if menu_items %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for item in menu_items %}
+        <div class="dish-card reveal">
+            <a href="{% url 'storefront:menu_item_detail' item.slug %}" class="dish-image-wrap aspect-[4/3] block">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="image-placeholder w-full h-full">
+                        <span class="font-display text-sm">{{ item.name }}</span>
+                    </div>
+                {% endif %}
+            </a>
+            <div class="p-6">
+                <p class="eyebrow text-xs mb-1">{{ item.category.name }}</p>
+                <a href="{% url 'storefront:menu_item_detail' item.slug %}">
+                    <h3 class="font-display text-xl font-bold mb-2 hover:text-ember transition">{{ item.name }}</h3>
+                </a>
+                <p class="text-cream-white/60 text-sm mb-5 line-clamp-2">{{ item.description|default:"A Lolaire's Kitchen favorite." }}</p>
+                <div class="flex items-center justify-between">
+                    <p class="font-display text-lg font-bold text-ember">₦{{ item.price }}</p>
+                    <form method="post" action="{% url 'storefront:cart_add' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="menu_item_id" value="{{ item.pk }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-outline-light text-xs !px-4 !py-2">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-24 border border-dashed border-cream-white/15 rounded-2xl reveal">
+        <p class="font-display text-2xl mb-2">No dishes available right now.</p>
+        <p class="text-cream-white/50">Try a different search or check back soon.</p>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

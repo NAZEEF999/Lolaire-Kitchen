@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Tables — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="font-display text-xl">Tables</h1>
+        <p class="text-inksoft text-sm mt-1">Floor layout and live table status.</p>
+    </div>
+    {% if can_create %}
+    <a href="{% url 'tables:create' %}" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+        + Add Table
+    </a>
+    {% endif %}
+</div>
+
+<form method="get" class="mb-6 flex gap-3">
+    <select name="status" class="rounded-md border border-hairline px-3 py-2 text-sm">
+        <option value="">Any status</option>
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-medium hover:bg-hairline/40">
+        Filter
+    </button>
+</form>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for table in tables %}
+    <a href="{{ table.get_absolute_url }}" class="admin-card hover:border-brand/40 transition-colors">
+        <p class="font-semibold">{{ table }}</p>
+        <p class="text-sm text-inksoft mt-1">Seats {{ table.capacity }}</p>
+        <span class="badge mt-3 inline-block
+            {% if table.status == 'available' %}badge-accent
+            {% elif table.status == 'occupied' %}badge-critical
+            {% elif table.status == 'reserved' %}badge-warning
+            {% else %}badge-neutral{% endif %}">
+            {{ table.get_status_display }}
+        </span>
+    </a>
+    {% empty %}
+    <p class="text-inksoft text-sm">No tables yet.</p>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<div class="flex gap-4 mt-6 text-sm items-center">
+    {% if page_obj.has_previous %}
+        <a href="?status={{ selected_status }}&page={{ page_obj.previous_page_number }}" class="font-semibold text-brand hover:underline">Previous</a>
+    {% endif %}
+    <span class="text-inksoft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?status={{ selected_status }}&page={{ page_obj.next_page_number }}" class="font-semibold text-brand hover:underline">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

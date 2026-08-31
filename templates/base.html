@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lolaire's Kitchen — Admin{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              appbg: '#F8F7F4',
+              surface: '#FFFFFF',
+              ink: '#201B15',
+              inksoft: '#6B6154',
+              brand: { DEFAULT: '#B4802F', 50: '#FBF3E7' },
+              accent: { DEFAULT: '#2F6F5E', 50: '#EAF4F1' },
+              warning: { DEFAULT: '#B8590A', 50: '#FEF3E2' },
+              info: { DEFAULT: '#2A5C99', 50: '#EAF1FB' },
+              critical: { DEFAULT: '#B23B34', 50: '#FBECEB' },
+              hairline: '#E7E3DA',
+              // Dark sidebar shell — deliberately its own small palette
+              // rather than reusing `ink`/`appbg`: the main content area
+              // (tables, forms, cards) stays on the light theme above,
+              // only the persistent sidebar/topbar shell is dark, per
+              // the reference design.
+              sidebar: { DEFAULT: '#16161B', hover: '#202027', active: '#2A2A33' },
+              sidebarline: '#2A2A33',
+              sidebartext: '#9E9EAA',
+            },
+            fontFamily: {
+              display: ['Fraunces', 'serif'],
+              body: ['Manrope', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-appbg text-ink font-body antialiased min-h-screen">
+
+{% if user.is_authenticated %}
+    <div class="flex min-h-screen">
+        {% include "includes/sidebar.html" %}
+
+        <div class="flex-1 flex flex-col min-w-0 lg:pl-64">
+            {% include "includes/navbar.html" %}
+
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="rounded-lg px-4 py-3 text-sm border
+                        {% if message.tags == 'error' %} bg-critical-50 text-critical border-critical/30
+                        {% elif message.tags == 'warning' %} bg-brand-50 text-ink border-brand/30
+                        {% else %} bg-accent-50 text-accent border-accent/30 {% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+{% else %}
+    <main class="min-h-screen flex items-center justify-center p-6 bg-appbg">
+{% endif %}
+
+                {% block content %}
+                {% endblock %}
+
+{% if user.is_authenticated %}
+            </main>
+
+            {% include "includes/footer.html" %}
+        </div>
+    </div>
+{% else %}
+    </main>
+{% endif %}
+
+    <script src="{% static 'js/custom.js' %}"></script>
+    {% if user.is_authenticated %}<script src="{% static 'js/dashboard-live.js' %}"></script>{% endif %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

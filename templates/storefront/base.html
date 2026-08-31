@@ -1,0 +1,171 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Lolaire's Kitchen{% endblock %}</title>
+
+    <meta
+        name="description"
+        content="{% block meta_description %}Lolaire's Kitchen — Nigerian-inspired cuisine, reimagined for modern dining. Order online or reserve your table.{% endblock %}"
+    >
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: "#0b0a0d",
+                        "ink-soft": "#17151b",
+                        ember: "#ab762a",
+                        "ember-dark": "#8f6321",
+                        parchment: "#0b0a0d",
+                        "parchment-soft": "#141216",
+                        gold: "#c08d3b",
+                        "cream-white": "#f6f1e6",
+                        danger: "#d1614a"
+                    }
+                }
+            }
+        };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/storefront.css' %}"
+    >
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-parchment text-cream-white">
+
+    <div
+        id="site-preloader"
+        class="fixed inset-0 z-[9999] bg-ink flex items-center justify-center"
+    >
+        <div class="text-center">
+
+            <img
+                src="{% static 'images/logo.png' %}"
+                alt="Lolaire's Kitchen"
+                class="w-48 sm:w-56 md:w-64 h-auto mx-auto object-contain"
+            >
+
+            <div class="mt-8 w-40 h-1 bg-cream-white/10 rounded-full overflow-hidden mx-auto">
+                <div
+                    id="preloader-progress"
+                    class="h-full bg-ember"
+                    style="width: 0%;"
+                ></div>
+            </div>
+
+            <p class="mt-4 text-[10px] tracking-[0.35em] uppercase text-cream-white/40">
+                Preparing your experience
+            </p>
+
+        </div>
+    </div>
+
+    {% include "storefront/includes/navbar.html" %}
+
+    {% if messages %}
+    <div class="fixed top-24 right-4 z-50 space-y-2 max-w-xs w-full">
+
+        {% for message in messages %}
+
+        <div
+            class="toast rounded-xl px-4 py-3 text-sm font-medium shadow-lg
+                {% if message.tags == 'success' %}bg-ink text-cream-white border border-gold/40
+                {% elif message.tags == 'error' %}bg-danger text-cream-white
+                {% elif message.tags == 'warning' %}bg-ember text-ink
+                {% else %}bg-ink-soft text-cream-white border border-cream-white/10{% endif %}"
+        >
+            {{ message }}
+        </div>
+
+        {% endfor %}
+
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "storefront/includes/footer.html" %}
+
+    <script src="{% static 'js/storefront.js' %}"></script>
+
+    <script>
+    (function () {
+        var preloader = document.getElementById("site-preloader");
+        if (!preloader) return;
+
+        // Only show the full animated preload once per browser session —
+        // not on every internal page navigation (this is a multi-page
+        // site, so a normal <a> click reloads the whole document and
+        // window's "load" event fires again every single time).
+        if (sessionStorage.getItem("lolaire-preloaded")) {
+            preloader.style.display = "none";
+            return;
+        }
+
+        var progress = document.getElementById("preloader-progress");
+        var hidden = false;
+
+        function hidePreloader() {
+            if (hidden) return;
+            hidden = true;
+
+            sessionStorage.setItem("lolaire-preloaded", "1");
+
+            preloader.style.transition = "opacity 0.7s ease";
+            preloader.style.opacity = "0";
+
+            setTimeout(function () {
+                preloader.style.display = "none";
+            }, 700);
+        }
+
+        var value = 0;
+        var timer = setInterval(function () {
+            value += 5;
+            if (progress) progress.style.width = value + "%";
+            if (value >= 100) {
+                clearInterval(timer);
+                setTimeout(hidePreloader, 200);
+            }
+        }, 30);
+
+        // Safety net: if page "load" (fonts/CDN scripts/images) is slow
+        // or blocked, don't leave the visitor staring at this forever.
+        window.addEventListener("load", function () {
+            value = 100;
+            if (progress) progress.style.width = "100%";
+        });
+        setTimeout(hidePreloader, 4000);
+    })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

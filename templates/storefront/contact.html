@@ -1,0 +1,57 @@
+{% extends "storefront/base.html" %}
+{% block title %}Contact — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-24 max-w-7xl mx-auto px-6 lg:px-10">
+    <p class="eyebrow mb-6 reveal">Get In Touch</p>
+    <h1 class="font-display text-5xl lg:text-6xl font-extrabold tracking-tight mb-16 reveal">We'd love to hear from you.</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-16">
+        <div class="lg:col-span-3 reveal">
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-semibold mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p class="text-sm text-danger mt-1">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 reveal">
+            <div class="bg-ink text-cream-white rounded-2xl p-10 h-full">
+                <p class="eyebrow eyebrow-light mb-6">Visit Us</p>
+                <div class="space-y-6 text-sm text-cream-white/70 leading-relaxed">
+                    {% if restaurant_settings.address %}
+                    <div>
+                        <p class="font-display text-cream-white text-base font-bold mb-1">Address</p>
+                        <p>{{ restaurant_settings.address }}</p>
+                    </div>
+                    {% endif %}
+                    {% if restaurant_settings.opening_hours %}
+                    <div>
+                        <p class="font-display text-cream-white text-base font-bold mb-1">Hours</p>
+                        <p>{{ restaurant_settings.opening_hours }}</p>
+                    </div>
+                    {% endif %}
+                    {% if restaurant_settings.phone %}
+                    <div>
+                        <p class="font-display text-cream-white text-base font-bold mb-1">Phone</p>
+                        <a href="tel:{{ restaurant_settings.phone }}" class="hover:text-cream-white transition">{{ restaurant_settings.phone }}</a>
+                    </div>
+                    {% endif %}
+                    {% if restaurant_settings.email %}
+                    <div>
+                        <p class="font-display text-cream-white text-base font-bold mb-1">Email</p>
+                        <a href="mailto:{{ restaurant_settings.email }}" class="hover:text-cream-white transition">{{ restaurant_settings.email }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

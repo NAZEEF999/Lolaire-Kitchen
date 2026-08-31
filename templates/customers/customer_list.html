@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Customers — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="font-display text-xl">Customers</h1>
+        <p class="text-inksoft text-sm mt-1">Everyone who's ordered or reserved with us.</p>
+    </div>
+    {% if can_create %}
+    <a href="{% url 'customers:create' %}" class="btn-admin-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold">
+        + Add Customer
+    </a>
+    {% endif %}
+</div>
+
+<form method="get" class="mb-6 flex gap-3">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by name, phone, or email..."
+           class="rounded-md border border-hairline px-3 py-2 text-sm w-full max-w-sm">
+    <button type="submit" class="bg-appbg border border-hairline rounded-md px-4 py-2 text-sm font-medium hover:bg-hairline/40">
+        Search
+    </button>
+</form>
+
+<div class="admin-card !p-0 overflow-hidden">
+    <table class="admin-table">
+        <thead><tr><th>Name</th><th>Phone</th><th>Email</th></tr></thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr class="cursor-pointer" onclick="window.location='{{ customer.get_absolute_url }}'">
+                <td class="font-semibold">{{ customer.full_name }}</td>
+                <td class="text-inksoft">{{ customer.phone_number }}</td>
+                <td class="text-inksoft">{{ customer.email|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center py-10 text-inksoft">No customers yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="flex gap-4 mt-6 text-sm items-center">
+    {% if page_obj.has_previous %}
+        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="font-semibold text-brand hover:underline">Previous</a>
+    {% endif %}
+    <span class="text-inksoft">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="font-semibold text-brand hover:underline">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

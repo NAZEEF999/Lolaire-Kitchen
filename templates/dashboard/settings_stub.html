@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Settings — Lolaire's Kitchen Admin{% endblock %}
+
+{% block content %}
+<div class="admin-card text-center py-16 max-w-lg mx-auto">
+    <div class="w-12 h-12 rounded-full bg-brand-50 text-brand flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 000-3l2-1.5-2-3.4-2.3.9a7.5 7.5 0 00-2.6-1.5L14 2.5h-4l-.5 2.5a7.5 7.5 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 000 3l-2 1.5 2 3.4 2.3-.9c.77.66 1.65 1.17 2.6 1.5l.5 2.5h4l.5-2.5a7.5 7.5 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg>
+    </div>
+    <h2 class="font-display text-xl mb-2">Restaurant settings aren't stored yet</h2>
+    <p class="text-inksoft text-sm">
+        Things like opening hours, delivery/pickup rules, and reservation limits aren't backed by a database
+        model in this project today. Rather than fake a form that doesn't save anywhere, this page is a
+        placeholder — ask for a Settings model + form whenever you're ready to make these fields real.
+    </p>
+</div>
+{% endblock %}

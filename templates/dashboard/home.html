@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% block title %}Overview — Lolaire's Kitchen Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="font-display text-2xl">{{ greeting }}, {{ user.get_full_name|default:user.username }} 👋</h1>
+    <p class="text-inksoft text-sm mt-1">{% now "l, F j, Y" %}</p>
+</div>
+
+<!-- Stat cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    {% if "daily_revenue" in stats %}
+    <div class="admin-card">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-2">Total Revenue</p>
+                <p class="font-display text-2xl">₦{{ stats.daily_revenue }}</p>
+                {% if revenue_pct_change is not None %}
+                <p class="text-xs font-medium mt-1 {% if revenue_pct_change >= 0 %}text-accent{% else %}text-critical{% endif %}">
+                    {% if revenue_pct_change >= 0 %}↑{% else %}↓{% endif %} {{ revenue_pct_change|floatformat:1 }}% vs yesterday
+                </p>
+                {% endif %}
+            </div>
+            <svg viewBox="0 0 100 32" class="w-16 h-8 shrink-0 mt-1"><polyline points="{{ revenue_sparkline_points }}" fill="none" stroke="#B4802F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+    </div>
+    {% endif %}
+    {% if "total_orders" in stats or "todays_orders" in stats %}
+    <div class="admin-card">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-2">Total Orders</p>
+                <p class="font-display text-2xl">{{ stats.total_orders|default:stats.todays_orders }}</p>
+                {% if stats.todays_orders %}<p class="text-xs font-medium mt-1 text-accent">↑ {{ stats.todays_orders }} today</p>{% endif %}
+            </div>
+            <svg viewBox="0 0 100 32" class="w-16 h-8 shrink-0 mt-1"><polyline points="{{ orders_sparkline_points }}" fill="none" stroke="#2F6F5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+    </div>
+    {% endif %}
+    {% if "reservations_today" in stats %}
+    <div class="admin-card {% if stats.pending_reservations %}stat-card-warning{% endif %}">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-2">Reservations</p>
+        <p class="font-display text-2xl">{{ stats.reservations_today }}</p>
+        {% if stats.pending_reservations %}<p class="text-xs font-medium mt-1 text-warning">{{ stats.pending_reservations }} awaiting confirmation</p>{% endif %}
+    </div>
+    {% endif %}
+    {% if "total_customers" in stats %}
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-2">Customers</p>
+        <p class="font-display text-2xl">{{ stats.total_customers }}</p>
+        {% if stats.new_customers_today %}<p class="text-xs font-medium mt-1 text-info">↑ {{ stats.new_customers_today }} new today</p>{% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Live Orders + Order Pipeline -->
+{% if can_see_orders %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <div class="admin-card lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-semibold">Live Orders</p>
+            <a href="{% url 'orders:list' %}" class="text-xs font-semibold text-brand hover:underline">View All Orders</a>
+        </div>
+        {% if live_orders %}
+        <div class="space-y-3">
+            {% for order in live_orders %}
+            <div class="border border-warning/30 bg-warning-50 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="badge badge-critical">NEW</span>
+                    <span class="text-xs text-inksoft">{{ order.created_at|timesince }} ago</span>
+                </div>
+                <div class="flex items-center justify-between mb-1">
+                    <p class="font-semibold text-sm">#{{ order.order_number }}</p>
+                    {% if can_see_payments %}<p class="font-semibold text-sm">₦{{ order.total_amount }}</p>{% endif %}
+                </div>
+                <p class="text-xs text-inksoft mb-2">
+                    {% if order.table %}Table {{ order.table.table_number }}{% else %}Takeaway{% endif %} · {{ order.items.count }} item{{ order.items.count|pluralize }}
+                </p>
+                <div class="flex items-center gap-2">
+                    {% if can_edit_orders %}
+                    <form method="post" action="{% url 'orders:status_update' order.pk %}" class="flex-1">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="preparing">
+                        <button type="submit" class="w-full bg-ink text-white rounded-md py-1.5 text-xs font-semibold hover:bg-ink/90">Start Preparing</button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'orders:detail' order.pk %}" class="flex-1 text-center bg-white border border-hairline rounded-md py-1.5 text-xs font-semibold hover:bg-appbg">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-inksoft text-sm py-10 text-center">No orders today.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-card lg:col-span-2 !p-0">
+        <p class="text-sm font-semibold px-5 pt-5 pb-4">Order Pipeline</p>
+        <div class="flex gap-3 overflow-x-auto px-5 pb-5">
+            {% for column in order_pipeline %}
+            <div class="min-w-[190px] flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide
+                        {% if column.status == 'pending' %}text-critical{% elif column.status == 'preparing' %}text-info{% elif column.status == 'ready' %}text-accent{% else %}text-inksoft{% endif %}">
+                        {{ column.label }}
+                    </span>
+                    <span class="text-xs font-semibold text-inksoft">{{ column.count }}</span>
+                </div>
+                <div class="space-y-2">
+                    {% for order in column.orders %}
+                    <a href="{% url 'orders:detail' order.pk %}" class="block bg-appbg rounded-lg p-2.5 hover:bg-hairline/40 transition-colors">
+                        <p class="text-xs font-semibold">#{{ order.order_number }}</p>
+                        <p class="text-xs text-inksoft mt-0.5">{% if order.table %}Table {{ order.table.table_number }}{% else %}Takeaway{% endif %}</p>
+                        {% if can_see_payments %}<p class="text-xs font-medium mt-0.5">₦{{ order.total_amount }}</p>{% endif %}
+                    </a>
+                    {% empty %}
+                    <p class="text-xs text-inksoft py-4 text-center">None</p>
+                    {% endfor %}
+                    {% if column.more %}<p class="text-xs text-brand font-semibold text-center pt-1">+{{ column.more }} more</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Table Overview + Upcoming Reservations -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    {% if can_see_tables %}
+    <div class="admin-card lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-semibold">Table Overview</p>
+            <a href="{% url 'tables:list' %}" class="text-xs font-semibold text-brand hover:underline">View All</a>
+        </div>
+        <div class="flex flex-wrap gap-3 mb-4">
+            <div class="bg-accent-50 rounded-lg px-3 py-2 text-center min-w-[70px]"><p class="font-display text-lg text-accent">{{ stats.available_tables|default:0 }}</p><p class="text-[0.65rem] text-accent font-semibold">Available</p></div>
+            <div class="bg-critical-50 rounded-lg px-3 py-2 text-center min-w-[70px]"><p class="font-display text-lg text-critical">{{ stats.occupied_tables|default:0 }}</p><p class="text-[0.65rem] text-critical font-semibold">Occupied</p></div>
+        </div>
+        {% if floor_tables %}
+        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+            {% for table in floor_tables %}
+            <a href="{% url 'tables:detail' table.pk %}" class="rounded-lg py-2.5 text-center text-xs font-semibold border
+                {% if table.status == 'available' %}bg-accent-50 text-accent border-accent/20
+                {% elif table.status == 'occupied' %}bg-critical-50 text-critical border-critical/20
+                {% elif table.status == 'reserved' %}bg-warning-50 text-warning border-warning/20
+                {% else %}bg-appbg text-inksoft border-hairline{% endif %}">
+                T{{ table.table_number }}
+            </a>
+            {% endfor %}
+        </div>
+        <div class="flex flex-wrap gap-4 mt-4 text-xs text-inksoft">
+            <span class="flex items-center gap-1.5"><span class="status-dot status-dot-success"></span>Available</span>
+            <span class="flex items-center gap-1.5"><span class="status-dot status-dot-critical"></span>Occupied</span>
+            <span class="flex items-center gap-1.5"><span class="status-dot status-dot-warning"></span>Reserved</span>
+            <span class="flex items-center gap-1.5"><span class="status-dot" style="background:#6B6154"></span>Cleaning / Out of service</span>
+        </div>
+        {% else %}
+        <p class="text-inksoft text-sm py-10 text-center">No tables set up yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="admin-card">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-semibold">Upcoming Reservations</p>
+            {% if can_see_orders or can_see_tables %}<a href="{% url 'reservations:list' %}" class="text-xs font-semibold text-brand hover:underline">View All</a>{% endif %}
+        </div>
+        {% if upcoming_reservations %}
+        <ul class="space-y-3">
+            {% for reservation in upcoming_reservations %}
+            <li class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold">{{ reservation.reservation_time|time:"g:i A" }} — {{ reservation.full_name }}</p>
+                    <p class="text-xs text-inksoft">{{ reservation.number_of_guests }} guests</p>
+                </div>
+                <span class="badge {% if reservation.status == 'confirmed' %}badge-accent{% else %}badge-warning{% endif %}">{{ reservation.get_status_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-inksoft text-sm py-10 text-center">No reservations scheduled.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Revenue chart + Best Sellers + Inventory Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    {% if can_see_payments %}
+    <div class="admin-card">
+        <p class="text-sm font-semibold mb-4">Revenue Overview <span class="text-inksoft font-normal">— last 7 days</span></p>
+        {% if revenue_chart_data.labels %}<canvas id="revenueChart" height="180"></canvas>{% else %}<p class="text-inksoft text-sm py-16 text-center">No payment data available.</p>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if best_sellers %}
+    <div class="admin-card">
+        <p class="text-sm font-semibold mb-4">Best Sellers</p>
+        <div class="space-y-3">
+            {% for item in best_sellers %}
+            <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="font-medium">{{ forloop.counter }}. {{ item.name }}</span>
+                    <span class="text-inksoft">{{ item.count }} sold</span>
+                </div>
+                <div class="h-1.5 bg-appbg rounded-full overflow-hidden">
+                    <div class="h-full bg-brand rounded-full" style="width: {{ item.pct }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% elif can_see_menu %}
+    <div class="admin-card"><p class="text-sm font-semibold mb-4">Best Sellers</p><p class="text-inksoft text-sm py-16 text-center">No orders yet.</p></div>
+    {% endif %}
+
+    {% if can_inventory %}
+    <div class="admin-card">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-semibold">Inventory Alerts</p>
+            <a href="{% url 'inventory:ingredient_list' %}" class="text-xs font-semibold text-brand hover:underline">View All</a>
+        </div>
+        {% if stats.low_stock_count %}
+        <div class="space-y-3">
+            {% for event in live_activity %}
+                {% if event.kind == "inventory" %}
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-medium">{{ event.title }}</span>
+                        <span class="text-warning">⚠</span>
+                    </div>
+                    <p class="text-xs text-inksoft">{{ event.subtitle }}</p>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-inksoft text-sm py-16 text-center">All stock levels healthy.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Activity + Needs Attention -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="admin-card lg:col-span-2 !p-0 overflow-hidden">
+        <p class="text-sm font-semibold px-5 pt-5 pb-3">Recent Activity</p>
+        {% if live_activity %}
+        <ul class="divide-y divide-hairline max-h-96 overflow-y-auto">
+            {% for event in live_activity %}
+            <li>
+                {% if event.url %}<a href="{{ event.url }}" class="block px-5 py-3 hover:bg-appbg transition-colors">{% else %}<div class="px-5 py-3">{% endif %}
+                    <div class="flex items-start gap-3">
+                        <span class="status-dot status-dot-{{ event.color }} mt-1.5"></span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium">{{ event.title }}</p>
+                            <p class="text-xs text-inksoft mt-0.5">{{ event.subtitle }}</p>
+                        </div>
+                        <p class="text-xs text-inksoft whitespace-nowrap">{{ event.timestamp|timesince }} ago</p>
+                    </div>
+                {% if event.url %}</a>{% else %}</div>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-inksoft text-sm p-10 text-center">Nothing to show yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-card">
+        <p class="text-sm font-semibold mb-4">Needs Attention</p>
+        <ul class="space-y-3">
+            {% for item in needs_attention %}
+            <li>
+                {% if item.url %}<a href="{% url item.url %}" class="flex items-center gap-2.5 text-sm hover:text-brand">{% else %}<div class="flex items-center gap-2.5 text-sm">{% endif %}
+                    <span class="status-dot status-dot-{{ item.color }}"></span>
+                    <span class="flex-1">{{ item.text }}</span>
+                    {% if item.url %}<svg class="w-3.5 h-3.5 text-inksoft shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/></svg>{% endif %}
+                {% if item.url %}</a>{% else %}</div>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  Chart.defaults.font.family = "'Manrope', sans-serif";
+  Chart.defaults.color = '#6B6154';
+
+  {% if revenue_chart_data.labels %}
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: {{ revenue_chart_data.labels|safe }},
+      datasets: [{
+        label: 'Revenue',
+        data: {{ revenue_chart_data.datasets.0.data|safe }},
+        borderColor: '#B4802F',
+        backgroundColor: 'rgba(180,128,47,0.08)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 2,
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#F0EDE6' } }, x: { grid: { display: false } } } }
+  });
+  {% endif %}
+</script>
+{% endblock %}

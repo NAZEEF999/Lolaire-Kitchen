@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Staff — Lolaire's Kitchen Admin{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+        <h2 class="font-display text-xl">Staff</h2>
+        <p class="text-inksoft text-sm">Everyone with a login to this system, and what they can access.</p>
+    </div>
+    {% if user.is_superuser %}
+    <a href="{% url 'dashboard:staff_tags' %}" class="text-xs font-semibold text-brand hover:underline whitespace-nowrap">Manage Tags</a>
+    {% endif %}
+</div>
+
+<div class="admin-card !p-0 overflow-hidden overflow-x-auto">
+    {% if staff %}
+    <table class="admin-table min-w-[820px]">
+        <thead><tr><th>Name</th><th>Tags</th><th>Status</th><th>Dashboard</th><th>Admin Panel</th><th>Sections On</th><th></th></tr></thead>
+        <tbody>
+            {% for row in staff %}
+            <tr>
+                <td class="font-medium">
+                    {{ row.member.get_full_name|default:row.member.username }}
+                    {% if row.member.is_superuser %}<span class="badge badge-brand ml-1">Main Administrator</span>{% endif %}
+                </td>
+                <td>
+                    {% for tag in row.member.tags.all %}<span class="badge badge-neutral">{{ tag.name }}</span>{% empty %}<span class="text-inksoft text-xs">—</span>{% endfor %}
+                </td>
+                <td>
+                    {% if row.member.is_active %}<span class="badge badge-accent">Active</span>
+                    {% else %}<span class="badge badge-critical">Inactive</span>{% endif %}
+                </td>
+                <td>
+                    {% if row.dashboard_enabled %}<span class="badge badge-accent">On</span>
+                    {% else %}<span class="badge badge-neutral">Off</span>{% endif %}
+                </td>
+                <td>
+                    {% if row.admin_panel_enabled %}<span class="badge badge-accent">On</span>
+                    {% else %}<span class="badge badge-neutral">Off</span>{% endif %}
+                </td>
+                <td class="text-inksoft">{{ row.sections_on_count }} / {{ total_sections }}</td>
+                <td>
+                    {% if not row.member.is_superuser and user.is_superuser %}
+                    <div class="flex items-center gap-3 whitespace-nowrap">
+                        <a href="{% url 'dashboard:staff_access_edit' row.member.pk %}" class="text-xs font-semibold text-brand hover:underline">Manage Access</a>
+                        {% if row.member.is_active %}
+                        <form method="post" action="{% url 'dashboard:staff_suspend' row.member.pk %}" onsubmit="return confirm('Suspend {{ row.member }}? They will be logged out and unable to log back in until reactivated.');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs font-semibold text-critical hover:underline">Deactivate</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'dashboard:staff_reactivate' row.member.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs font-semibold text-accent hover:underline">Activate</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-inksoft text-sm p-10 text-center">No staff accounts yet.</p>
+    {% endif %}
+</div>
+
+{% if not user.is_superuser %}
+<p class="text-xs text-inksoft mt-4">
+    Only the Main Administrator can manage staff access.
+</p>
+{% endif %}
+{% endblock %}

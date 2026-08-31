@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Customer History — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<a href="{% url 'reports:customers' %}" class="text-xs font-semibold text-brand hover:underline">&larr; Back to Customer Report</a>
+{% if summary %}
+<h1 class="font-display text-xl mt-2 mb-6">{{ summary.customer.full_name }}</h1>
+<div class="admin-card max-w-sm mb-6">
+    <p class="text-sm text-inksoft">Total Orders: <span class="font-semibold text-ink">{{ summary.order_count }}</span></p>
+    <p class="text-sm text-inksoft mt-1">Total Spent: <span class="font-semibold text-ink">₦{{ summary.total_spent }}</span></p>
+</div>
+<div class="admin-card !p-0 overflow-hidden">
+    <div class="divide-y divide-hairline">
+    {% for order in summary.orders %}
+        <div class="px-5 py-3 text-sm flex justify-between">
+            <span class="font-medium">#{{ order.order_number }}</span><span class="text-inksoft">₦{{ order.total_amount }}</span>
+        </div>
+    {% empty %}<p class="px-5 py-8 text-sm text-inksoft text-center">No orders yet.</p>{% endfor %}
+    </div>
+</div>
+{% else %}
+<p class="text-sm text-inksoft mt-4">Customer not found.</p>
+{% endif %}
+{% endblock %}

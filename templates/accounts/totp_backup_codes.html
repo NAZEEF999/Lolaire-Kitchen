@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Backup Codes — Restaurant Management System{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-16 bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+    <h1 class="text-xl font-semibold mb-2">
+        {% if regenerated %}New backup codes{% else %}2FA is now enabled{% endif %}
+    </h1>
+    <p class="text-sm text-gray-600 mb-4">
+        Save these somewhere safe — <strong>this is the only time they'll be shown.</strong>
+        Each code works once, and lets you recover your account through
+        <a href="{% url 'accounts:admin_recovery_identify' %}" class="text-blue-600 hover:underline">Main Administrator recovery</a>
+        if you ever lose access to your authenticator app.
+    </p>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-md p-4 font-mono text-sm grid grid-cols-2 gap-2">
+        {% for code in backup_codes %}
+        <div>{{ code }}</div>
+        {% endfor %}
+    </div>
+
+    <a href="{% url 'dashboard:staff_security' %}" class="block mt-6 text-sm text-blue-600 hover:underline text-center">
+        I've saved these — continue
+    </a>
+</div>
+{% endblock %}

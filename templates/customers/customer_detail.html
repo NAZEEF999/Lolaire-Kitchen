@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.full_name }} — Lolaire's Kitchen Admin{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+    <div class="admin-card mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h1 class="font-display text-xl">{{ customer.full_name }}</h1>
+            <span class="badge {% if customer.is_active %}badge-accent{% else %}badge-neutral{% endif %}">
+                {{ customer.is_active|yesno:"Active,Inactive" }}
+            </span>
+        </div>
+        <p class="text-sm text-inksoft">Phone: {{ customer.phone_number }}</p>
+        <p class="text-sm text-inksoft">Email: {{ customer.email|default:"—" }}</p>
+        <p class="text-sm text-inksoft mt-2">Address: {{ customer.address|default:"—" }}</p>
+        {% if customer.notes %}<p class="text-sm text-inksoft mt-2">Notes: {{ customer.notes }}</p>{% endif %}
+        <p class="text-xs text-inksoft/70 mt-4">Customer since {{ customer.created_at|date:"M d, Y" }}</p>
+
+        {% if can_edit or can_delete %}
+        <div class="flex gap-4 mt-5 pt-4 border-t border-hairline">
+            {% if can_edit %}<a href="{% url 'customers:update' customer.pk %}" class="text-sm font-semibold text-brand hover:underline">Edit</a>{% endif %}
+            {% if can_delete %}<a href="{% url 'customers:delete' customer.pk %}" class="text-sm font-semibold text-critical hover:underline">Delete</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="admin-card">
+        <p class="text-xs font-semibold uppercase tracking-wide text-inksoft mb-3">Order History</p>
+        {% if order_history %}
+            <ul class="space-y-2">
+            {% for order in order_history %}
+                <li class="text-sm text-inksoft">{{ order }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-sm text-inksoft">No orders yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

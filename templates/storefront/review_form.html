@@ -1,0 +1,61 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}Leave a Review — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+
+<section class="pt-40 pb-24 max-w-3xl mx-auto px-6 lg:px-10">
+
+    <p class="eyebrow mb-6">
+        Your Experience
+    </p>
+
+    <h1 class="font-display text-5xl font-extrabold tracking-tight mb-6">
+        Tell us what you think.
+    </h1>
+
+    <p class="text-cream-white/60 leading-relaxed mb-10">
+        We value honest feedback from our guests.
+        Your review will be checked by our team before
+        appearing on the website.
+    </p>
+
+    <form method="post" class="space-y-6">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+        <div>
+
+            <label
+                for="{{ field.id_for_label }}"
+                class="block text-sm font-semibold mb-2"
+            >
+                {{ field.label }}
+            </label>
+
+            {{ field }}
+
+            {% if field.errors %}
+            <p class="text-sm text-danger mt-2">
+                {{ field.errors.0 }}
+            </p>
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+        >
+            Submit Review
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

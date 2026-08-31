@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Reservations — Lolaire's Kitchen Admin{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+
+    <div>
+        <h2 class="font-display text-xl">Reservations</h2>
+        <p class="text-inksoft text-sm">
+            Requests submitted from the public website.
+        </p>
+    </div>
+
+    <form method="get" class="flex items-center gap-2">
+        <select
+            name="status"
+            onchange="this.form.submit()"
+            class="text-sm border border-hairline rounded-lg px-3 py-2 bg-surface focus:outline-none focus:ring-2 focus:ring-brand/40"
+        >
+            <option value="">All statuses</option>
+
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+</div>
+
+
+<div class="admin-card !p-0 overflow-hidden overflow-x-auto">
+
+    {% if reservations %}
+
+    <table class="admin-table min-w-[1000px]">
+
+        <thead>
+            <tr>
+                <th>Guest</th>
+                <th>Phone</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Guests</th>
+                <th>Special Request</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for reservation in reservations %}
+
+            <tr>
+
+                <!-- Guest -->
+                <td class="font-medium">
+                    {{ reservation.full_name }}
+                </td>
+
+
+                <!-- Phone -->
+                <td>
+                    {{ reservation.phone_number }}
+                </td>
+
+
+                <!-- Date -->
+                <td>
+                    {{ reservation.reservation_date }}
+                </td>
+
+
+                <!-- Time -->
+                <td>
+                    {{ reservation.reservation_time|time:"H:i" }}
+                </td>
+
+
+                <!-- Guests -->
+                <td>
+                    {{ reservation.number_of_guests }}
+                </td>
+
+
+                <!-- Special request -->
+                <td class="max-w-xs truncate">
+                    {{ reservation.special_request|default:"—" }}
+                </td>
+
+
+                <!-- Status -->
+                <td>
+
+                    <span
+                        class="badge
+                        {% if reservation.status == 'confirmed' %}
+                            badge-accent
+                        {% elif reservation.status == 'completed' %}
+                            badge-accent
+                        {% elif reservation.status == 'cancelled' %}
+                            badge-critical
+                        {% else %}
+                            badge-warning
+                        {% endif %}"
+                    >
+                        {{ reservation.get_status_display }}
+                    </span>
+
+                </td>
+
+
+                <!-- Actions -->
+                <td>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+
+
+                        <!-- PENDING -->
+                        {% if reservation.status == "pending" %}
+
+                            <form
+                                method="post"
+                                action="{% url 'reservations:status_update' reservation.pk %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="confirmed"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="btn-admin-primary text-xs"
+                                >
+                                    Confirm
+                                </button>
+
+                            </form>
+
+
+                            <form
+                                method="post"
+                                action="{% url 'reservations:status_update' reservation.pk %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="cancelled"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="text-xs px-3 py-2 rounded-lg border border-hairline hover:bg-surface"
+                                >
+                                    Cancel
+                                </button>
+
+                            </form>
+
+
+                        <!-- CONFIRMED -->
+                        {% elif reservation.status == "confirmed" %}
+
+                            <form
+                                method="post"
+                                action="{% url 'reservations:status_update' reservation.pk %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="completed"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="btn-admin-primary text-xs"
+                                >
+                                    Complete
+                                </button>
+
+                            </form>
+
+
+                            <form
+                                method="post"
+                                action="{% url 'reservations:status_update' reservation.pk %}"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="cancelled"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="text-xs px-3 py-2 rounded-lg border border-hairline hover:bg-surface"
+                                >
+                                    Cancel
+                                </button>
+
+                            </form>
+
+
+                        <!-- COMPLETED -->
+                        {% elif reservation.status == "completed" %}
+
+                            <span class="text-xs text-inksoft">
+                                Completed
+                            </span>
+
+
+                        <!-- CANCELLED -->
+                        {% elif reservation.status == "cancelled" %}
+
+                            <span class="text-xs text-inksoft">
+                                Cancelled
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+        <p class="text-inksoft text-sm p-10 text-center">
+            No reservations
+            {% if selected_status %}
+                with this status
+            {% endif %}
+            yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- Pagination -->
+{% if is_paginated %}
+
+<div class="flex items-center gap-2 mt-4 text-sm">
+
+    {% if page_obj.has_previous %}
+
+        <a
+            href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+            class="text-brand hover:underline"
+        >
+            Previous
+        </a>
+
+    {% endif %}
+
+
+    <span class="text-inksoft">
+        Page {{ page_obj.number }}
+        of {{ page_obj.paginator.num_pages }}
+    </span>
+
+
+    {% if page_obj.has_next %}
+
+        <a
+            href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}"
+            class="text-brand hover:underline"
+        >
+            Next
+        </a>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}

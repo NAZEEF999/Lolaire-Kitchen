@@ -1,0 +1,56 @@
+{% extends "storefront/base.html" %}
+{% block title %}Your Cart — Lolaire's Kitchen{% endblock %}
+
+{% block content %}
+<section class="pt-40 pb-24 max-w-5xl mx-auto px-6 lg:px-10">
+    <p class="eyebrow mb-6 reveal">Checkout</p>
+    <h1 class="font-display text-5xl font-extrabold tracking-tight mb-14 reveal">Your Cart</h1>
+
+    {% if lines %}
+    <div class="space-y-4 mb-10">
+        {% for line in lines %}
+        <div class="reveal flex items-center gap-5 bg-cream-white rounded-2xl p-5 border border-ink/8">
+            <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                {% if line.menu_item.image %}
+                    <img src="{{ line.menu_item.image.url }}" alt="{{ line.menu_item.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="image-placeholder w-full h-full"><span class="font-display text-xs text-center px-1">{{ line.menu_item.name }}</span></div>
+                {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="font-display font-bold text-ink truncate">{{ line.menu_item.name }}</h3>
+                <p class="text-sm text-ink/50">₦{{ line.menu_item.price }} each</p>
+            </div>
+            <form method="post" action="{% url 'storefront:cart_update' line.menu_item.pk %}" class="qty-stepper" data-qty-form>
+                {% csrf_token %}
+                <button type="button" data-qty-step="-1">&minus;</button>
+                <input type="number" name="quantity" value="{{ line.quantity }}" min="0" class="w-10 text-center bg-transparent focus:outline-none" readonly>
+                <button type="button" data-qty-step="1">+</button>
+            </form>
+            <p class="font-display font-bold text-ink w-24 text-right">₦{{ line.line_total }}</p>
+            <form method="post" action="{% url 'storefront:cart_remove' line.menu_item.pk %}">
+                {% csrf_token %}
+                <button type="submit" aria-label="Remove {{ line.menu_item.name }}" class="text-ink/30 hover:text-ember transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 bg-ink text-cream-white rounded-2xl p-8 reveal">
+        <div>
+            <p class="text-cream-white/60 text-sm mb-1">Subtotal</p>
+            <p class="font-display text-3xl font-bold">₦{{ subtotal }}</p>
+        </div>
+        <a href="{% url 'storefront:checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+    {% else %}
+    <div class="text-center py-24 border border-dashed border-cream-white/15 rounded-2xl reveal">
+        <p class="font-display text-2xl mb-2">Your cart is waiting for something delicious.</p>
+        <p class="text-cream-white/50 mb-8">Browse the menu and add a few favorites.</p>
+        <a href="{% url 'storefront:menu' %}" class="btn btn-primary">Explore Menu</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
