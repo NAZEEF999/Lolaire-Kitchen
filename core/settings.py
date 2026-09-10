@@ -47,7 +47,7 @@ def env_list(key, default=""):
 
 SECRET_KEY = env("DJANGO_SECRET_KEY", "django-insecure-change-me-in-.env")
 
-DEBUG = env_bool("DJANGO_DEBUG", True)
+DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost")
 
@@ -73,7 +73,7 @@ if VERCEL_URL:
 # effect once DJANGO_DEBUG=False is set in the production environment.
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week to start; raise once confirmed stable.
