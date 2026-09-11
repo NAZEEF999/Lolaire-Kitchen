@@ -1,0 +1,69 @@
+/* Light visual integration for Django Admin — brand color + header
+   tint only. This is NOT a full reskin of every admin template; it
+   makes /admin/ feel like it belongs to the same product rather than
+   a bare, unbranded Django default. */
+
+:root {
+  --primary: #B4802F;
+  --primary-fg: #fff;
+  --header-color: #fff;
+  --link-fg: #B4802F;
+  --link-hover-color: #96692A;
+  --link-selected-fg: #B4802F;
+  --object-tools-bg: #B4802F;
+  --object-tools-hover-bg: #96692A;
+}
+
+#header {
+  background: #201B15;
+}
+
+#branding a,
+#branding a:link,
+#branding a:visited {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+}
+
+#branding em {
+  font-style: italic;
+  color: #E4C88E;
+  font-weight: 500;
+}
+
+.lolaire-back-link {
+  display: inline-block;
+  margin-right: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff !important;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.lolaire-back-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+div.breadcrumbs {
+  background: #FBF3E7;
+  color: #201B15;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background: #201B15;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  background: #201B15;
+}
+.button:hover, input[type=submit]:hover, .submit-row input:hover {
+  background: #B4802F;
+}
+.button.default, input[type=submit].default, .submit-row input.default {
+  background: #B4802F;
+}
+.button.default:hover, input[type=submit].default:hover {
+  background: #96692A;
+}
